@@ -1,0 +1,26 @@
+{
+  "name": "cancelable-promise",
+  "description": "Prototyping cancelable promises",
+  "keywords": [
+    "promise",
+    "promises-aplus",
+    "cancelable promises",
+    "cancelation"
+  ],
+  "version": "1.0.0-pre",
+  "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
+  "license": "WTFPL",
+  "repository": "domenic/cancelable-promise",
+  "main": "lib/cancelable-promise.js",
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "test": "mocha --compilers js:mocha-traceur"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.4",
+    "mocha-traceur": "^2.1.0",
+    "promises-aplus-tests": "^2.1.0"
+  }
+}

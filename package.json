@@ -18,8 +18,8 @@
   "scripts": {
     "test-aplus-promise": "traceur-runner node_modules/promises-aplus-tests/lib/cli.js test/aplus-adapters/promise.js",
     "test-aplus-cancelable-promise": "traceur-runner node_modules/promises-aplus-tests/lib/cli.js test/aplus-adapters/cancelable-promise.js",
-    "test-cancelable-promise": "mocha --compilers js:mocha-traceur test/*.js",
-    "test": "npm run test-aplus-promise && npm run test-aplus-cancelable-promise && npm run test-cancelable-promise"
+    "test-non-aplus": "mocha --compilers js:mocha-traceur test/*.js",
+    "test": "npm run test-aplus-promise && npm run test-aplus-cancelable-promise && npm run test-non-aplus"
   },
   "devDependencies": {
     "mocha": "^2.2.4",

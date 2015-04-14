@@ -1,4 +1,4 @@
-import CancelablePromise from "../lib/cancelable-promise";
+import CancelablePromise from "../lib/cancelable-promise.js";
 import delay from "./helpers/delay.js";
 const assert = require("assert");
 

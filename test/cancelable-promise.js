@@ -30,7 +30,7 @@ describe("Basic onCanceled and .cancel() interaction", () => {
     assert(!called, "onCanceled should not be called");
   });
 
-  it("should not call the onFulfilled or onRejected handlers for a promise that resolves after cancelation", () => {
+  it("should not call the onFulfilled or onRejected handlers for a promise that fulfills after cancelation", () => {
     let resolve;
     const p = new CancelablePromise(r => resolve = r, () => {});
 
@@ -47,7 +47,7 @@ describe("Basic onCanceled and .cancel() interaction", () => {
     });
   });
 
-  it("should not call the onFulfilled handler for a promise that resolves after cancelation", () => {
+  it("should not call the onFulfilled or onRejected handlers for a promise that rejects after cancelation", () => {
     let reject;
     const p = new CancelablePromise((r, rr) => reject = rr, () => {});
 
@@ -71,6 +71,11 @@ describe("Cancelation propagation through non-branching chains", () => {
     assert.throws(() => CancelablePromise.prototype.then.call({ then() { } }), TypeError);
   });
 
+  it("should return a CancelablePromise instance from .then", () => {
+    const derived = new CancelablePromise(() => {}).then();
+    assert.strictEqual(derived.constructor, CancelablePromise);
+  });
+
   it("should call the original onCanceled handler when canceling a derived promise", () => {
     let called = false;
     const p = new CancelablePromise(() => {}, () => called = true);
@@ -78,5 +83,47 @@ describe("Cancelation propagation through non-branching chains", () => {
     p.then().cancel();
 
     assert(called, "onCanceled should be called");
+  });
+
+  it("should call the original onCanceled handler when canceling a derived promise several levels deep", () => {
+    let called = false;
+    const p = new CancelablePromise(() => {}, () => called = true);
+
+    p.then().then(() => {}).then(() => delay(1000)).catch(() => delay(1234)).catch(() => {}).cancel();
+
+    assert(called, "onCanceled should be called");
+  });
+
+  it("should not call the onCanceled handler if the original promise in the chain fulfills", () => {
+    let resolve;
+    const p = new CancelablePromise(r => resolve = r, () => {});
+
+    let calledOnFulfilled = false;
+    let calledOnRejected = false;
+    p.then(() => calledOnFulfilled = true, () => calledOnRejected = true).cancel();
+
+    resolve();
+
+    return delay().then(() => {
+      assert(!calledOnFulfilled, "onFulfilled should not be called")
+      assert(!calledOnRejected, "onRejected should not be called")
+    });
+  });
+
+
+  it("should not call the onCanceled handler if the original promise in the chain rejects", () => {
+    let reject;
+    const p = new CancelablePromise((r, rr) => reject = rr, () => {});
+
+    let calledOnFulfilled = false;
+    let calledOnRejected = false;
+    p.then(() => calledOnFulfilled = true, () => calledOnRejected = true).cancel();
+
+    reject();
+
+    return delay().then(() => {
+      assert(!calledOnFulfilled, "onFulfilled should not be called")
+      assert(!calledOnRejected, "onRejected should not be called")
+    });
   });
 });

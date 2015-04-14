@@ -2,7 +2,7 @@ import CancelablePromise from "../lib/cancelable-promise";
 import delay from "./helpers/delay.js";
 const assert = require("assert");
 
-describe("Cancelable Promise Tests", () => {
+describe("Basic onCanceled and .cancel() interaction", () => {
   it("should call the onCanceled handler when canceling a forever-pending promise", () => {
     let called = false;
     const p = new CancelablePromise(() => {}, () => called = true);
@@ -62,5 +62,21 @@ describe("Cancelable Promise Tests", () => {
       assert(!calledOnFulfilled, "onFulfilled should not be called")
       assert(!calledOnRejected, "onRejected should not be called")
     });
+  });
+});
+
+describe("Cancelation propagation through non-branching chains", () => {
+  it("should not allow CancelablePromise.prototype.then to be called on non-CancelablePromises", () => {
+    assert.throws(() => CancelablePromise.prototype.then.call(Promise.resolve()), TypeError);
+    assert.throws(() => CancelablePromise.prototype.then.call({ then() { } }), TypeError);
+  });
+
+  it("should call the original onCanceled handler when canceling a derived promise", () => {
+    let called = false;
+    const p = new CancelablePromise(() => {}, () => called = true);
+
+    p.then().cancel();
+
+    assert(called, "onCanceled should be called");
   });
 });

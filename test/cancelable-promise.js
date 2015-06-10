@@ -51,8 +51,8 @@ describe("Basic onCanceled and .cancel() interaction", () => {
     resolve();
 
     return delay().then(() => {
-      assert(!calledOnFulfilled, "onFulfilled should not be called")
-      assert(!calledOnRejected, "onRejected should not be called")
+      assert(!calledOnFulfilled, "onFulfilled should not be called");
+      assert(!calledOnRejected, "onRejected should not be called");
     });
   });
 
@@ -122,8 +122,8 @@ describe("Cancelation propagation through non-branching chains", () => {
     resolve();
 
     return delay().then(() => {
-      assert(!calledOnFulfilled, "onFulfilled should not be called")
-      assert(!calledOnRejected, "onRejected should not be called")
+      assert(!calledOnFulfilled, "onFulfilled should not be called");
+      assert(!calledOnRejected, "onRejected should not be called");
     });
   });
 
@@ -142,8 +142,34 @@ describe("Cancelation propagation through non-branching chains", () => {
     reject();
 
     return delay().then(() => {
-      assert(!calledOnFulfilled, "onFulfilled should not be called")
-      assert(!calledOnRejected, "onRejected should not be called")
+      assert(!calledOnFulfilled, "onFulfilled should not be called");
+      assert(!calledOnRejected, "onRejected should not be called");
     });
+  });
+});
+
+describe("Cancelation propagation through resolved values", () => {
+  it("should call the onCanceled handler of a promise that is the resolved value of a promise", () => {
+    let called = false;
+    const p = CancelablePromise.resolve(new CancelablePromise(() => {
+      return () => called = true;
+    }));
+
+    p.cancel();
+
+    assert(!called, "onCanceled should not be called");
+  });
+
+  it("should call onCanceled at the tip of a resolved value chain", () => {
+    let called = false;
+    const p = CancelablePromise.resolve(
+      new CancelablePromise(() => {
+        return () => called = true;
+      }).then(() => delay(1000)).catch(() => delay(1234)).catch(() => {})
+    );
+
+    p.cancel();
+
+    assert(!called, "onCanceled should not be called");
   });
 });

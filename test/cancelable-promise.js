@@ -1,5 +1,6 @@
 import CancelablePromise from "../lib/cancelable-promise.js";
 import delay from "./helpers/delay.js";
+
 const assert = require("assert");
 
 describe("Basic onCanceled and .cancel() interaction", () => {
@@ -157,7 +158,7 @@ describe("Cancelation propagation through resolved values", () => {
 
     p.cancel();
 
-    assert(!called, "onCanceled should not be called");
+    assert(called, "onCanceled should be called");
   });
 
   it("should call onCanceled at the tip of a resolved value chain", () => {
@@ -170,6 +171,6 @@ describe("Cancelation propagation through resolved values", () => {
 
     p.cancel();
 
-    assert(!called, "onCanceled should not be called");
+    assert(called, "onCanceled should be called");
   });
 });

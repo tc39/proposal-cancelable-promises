@@ -76,6 +76,16 @@ describe("Basic onCanceled and .cancel() interaction", () => {
       assert(!calledOnRejected, "onRejected should not be called");
     });
   });
+
+  it("should call the finally handler once cancelled even if promise is never directly resolved or rejected", done => {
+    const p = new CancelablePromise(() => {});
+    p.cancel();
+
+    p.finally(_ => {
+      assert(true, "finally called");
+      done();
+    });
+  });
 });
 
 describe("Cancelation propagation through non-branching chains", () => {
@@ -172,5 +182,73 @@ describe("Cancelation propagation through resolved values", () => {
     p.cancel();
 
     assert(called, "onCanceled should be called");
+  });
+});
+
+describe("Cancellable promises with multiple children", () => {
+  it("should not call cancel if one of two children are cancelled", () => {
+    let called = false;
+
+    const p1 = new CancelablePromise((resolve, reject) => {
+      return () => called = true;
+    });
+
+    const p2 = p1.then(() => {});
+    const p3 = p1.then(() => {});
+
+    p3.cancel();
+    assert(!called, "onCanceled should not be called");
+  });
+
+  it("should call cancel if two of two children are cancelled", () => {
+    let called = false;
+
+    const p1 = new CancelablePromise((resolve, reject) => {
+      return () => called = true;
+    });
+
+    const p2 = p1.then(() => {});
+    const p3 = p1.then(() => {});
+
+    p2.cancel();
+    p3.cancel();
+    assert(called, "onCanceled should be called");
+  });
+
+  it("should call cancel if directly cancelled, despite children", () => {
+    let called = false;
+
+    const p1 = new CancelablePromise((resolve, reject) => {
+      return () => called = true;
+    });
+
+    const p2 = p1.then(() => {});
+    const p3 = p1.then(() => {});
+
+    p1.cancel();
+    assert(called, "onCanceled should be called");
+  });
+
+  it("should not affect a cancelled child", () => {
+    let called = false;
+
+    const p1 = new CancelablePromise((resolve, reject) => {
+      setTimeout(resolve, 0);
+      return () => called = true;
+    });
+
+    const p2 = p1.then(() => {});
+    const p3 = p1.then(() => {});
+
+    p3.cancel();
+    assert(!called, "onCanceled should not be called");
+
+    let resolved = false;
+    let rejected = false;
+
+    return p3.then(() => resolved = true, () => rejected = true).finally(() => {
+      assert(!resolved, "resolved handler should not be called");
+      assert(!rejected, "reject handler should not be called");
+    });
   });
 });

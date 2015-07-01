@@ -62,6 +62,16 @@ for (const Constructor of [Promise, CancelablePromise]) {
       });
     });
 
+    it("should delay resolving if a promise is returned", () => {
+      const vals = [];
+      return Constructor.resolve()
+        .finally(() => delay().then(() => vals.push(1)))
+        .then(() => vals.push(2))
+        .then(() => {
+          assert.deepEqual(vals, [1, 2]);
+        });
+    });
+
     it("should ignore the rejection reason if onFinally throws", () => {
       const error = new Error("boo!");
       const error2 = new Error("boo!");

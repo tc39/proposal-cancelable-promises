@@ -77,7 +77,7 @@ describe("Basic onCanceled and .cancel() interaction", () => {
     });
   });
 
-  it("should call the finally handler once cancelled even if promise is never directly resolved or rejected", done => {
+  it("should call the finally handler for already rejected promise that never resolved/rejected", done => {
     const p = new CancelablePromise(() => {});
     p.cancel();
 
@@ -85,6 +85,17 @@ describe("Basic onCanceled and .cancel() interaction", () => {
       assert(true, "finally called");
       done();
     });
+  });
+
+  it("should call the finally handler when promise reject, despite never resolving/rejecting", done => {
+    const p = new CancelablePromise(() => {});
+
+    p.finally(_ => {
+      assert(true, "finally called");
+      done();
+    });
+
+    delay().then(_ => p.cancel());
   });
 });
 
@@ -138,7 +149,6 @@ describe("Cancelation propagation through non-branching chains", () => {
     });
   });
 
-
   it("should not call the onCanceled handler if the original promise in the chain rejects", () => {
     let reject;
     const p = new CancelablePromise((r, rr) => {
@@ -155,6 +165,49 @@ describe("Cancelation propagation through non-branching chains", () => {
     return delay().then(() => {
       assert(!calledOnFulfilled, "onFulfilled should not be called");
       assert(!calledOnRejected, "onRejected should not be called");
+    });
+  });
+
+  it("should call chained finallies", done => {
+    const p = new CancelablePromise(_ => {});
+    p.cancel();
+
+    let callCount = 0;
+
+    p.finally(_ => callCount++).finally(_ => {
+      callCount++;
+      assert.strictEqual(callCount, 2, "Both finallies called");
+      done();
+    });
+  });
+
+  it("should allow finally without function", done => {
+    const p = new CancelablePromise(_ => {});
+    p.cancel();
+
+    p.finally().finally(_ => {
+      assert(true, "Second finally called");
+      done();
+    });
+  });
+
+  it("should call finally on child promises", done => {
+    var p = new CancelablePromise(_ => {});
+    p.cancel();
+
+    p.then().finally(_ => {
+      assert(true, "Finally called");
+      done();
+    });
+  });
+
+  it("should call finally on child promises with later cancelation", done => {
+    var p = new CancelablePromise(_ => {});
+    delay().then(_ => p.cancel());
+
+    p.finally(_ => {
+      assert(true, "Finally called");
+      done();
     });
   });
 });
@@ -229,7 +282,7 @@ describe("Cancellable promises with multiple children", () => {
     assert(called, "onCanceled should be called");
   });
 
-  it("should not affect a cancelled child", () => {
+  it("should not affect a cancelled child", (done) => {
     let called = false;
 
     const p1 = new CancelablePromise((resolve, reject) => {
@@ -246,9 +299,10 @@ describe("Cancellable promises with multiple children", () => {
     let resolved = false;
     let rejected = false;
 
-    return p3.then(() => resolved = true, () => rejected = true).finally(() => {
+    p3.then(() => resolved = true, () => rejected = true).finally(() => {
       assert(!resolved, "resolved handler should not be called");
       assert(!rejected, "reject handler should not be called");
+      done();
     });
   });
 });

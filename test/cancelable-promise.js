@@ -210,6 +210,20 @@ describe("Cancelation propagation through non-branching chains", () => {
       done();
     });
   });
+
+  it("finally should add to child count", () => {
+    let called = false;
+    const p = new CancelablePromise(() => (() => called = true));
+
+    const p2 = p.then();
+    const p3 = p.finally();
+
+    p2.cancel();
+
+    return delay().then(_ => {
+      assert(!called, "Cancelation callback should not be called");
+    });
+  });
 });
 
 describe("Cancelation propagation through resolved values", () => {

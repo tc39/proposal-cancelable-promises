@@ -28,7 +28,47 @@ describe("Basic canceled interaction", () => {
     return delay().then(() => {
       assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
       assert.strictEqual(onRejectedCalled, false, "onRejected not called");
-      assert(onCanceledCalled, "onCanceled called");
+      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
+    });
+  });
+
+  it("should not call onCanceled if the the promise is fulfilled", () => {
+    let onFulfilledCalled = false;
+    let onRejectedCalled = false;
+    let onCanceledCalled = false;
+
+    const p = new Promise((resolve, reject, cancel) => resolve());
+
+    p.then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceledCalled = true
+    );
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledCalled, true, "onFulfilled called");
+      assert.strictEqual(onRejectedCalled, false, "onRejected not called");
+      assert.strictEqual(onCanceledCalled, false, "onCanceled not called");
+    });
+  });
+
+  it("should not call onCanceled if the the promise is rejected", () => {
+    let onFulfilledCalled = false;
+    let onRejectedCalled = false;
+    let onCanceledCalled = false;
+
+    const p = new Promise((resolve, reject, cancel) => reject());
+
+    p.then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceledCalled = true
+    );
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
+      assert.strictEqual(onRejectedCalled, true, "onRejected called");
+      assert.strictEqual(onCanceledCalled, false, "onCanceled not called");
     });
   });
 
@@ -51,7 +91,7 @@ describe("Basic canceled interaction", () => {
     return delay().then(() => {
       assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
       assert.strictEqual(onRejectedCalled, false, "onRejected not called");
-      assert(onCanceledCalled, "onCanceled called");
+      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
     });
   });
 
@@ -74,7 +114,53 @@ describe("Basic canceled interaction", () => {
     return delay().then(() => {
       assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
       assert.strictEqual(onRejectedCalled, false, "onRejected not called");
-      assert(onCanceledCalled, "onCanceled called");
+      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
+    });
+  });
+
+  it("should not call the onCanceled handler for a promise that cancels after fulfillment", () => {
+    let onFulfilledCalled = false;
+    let onRejectedCalled = false;
+    let onCanceledCalled = false;
+
+    const p = new Promise((resolve, reject, cancel) => {
+      resolve();
+      cancel();
+    });
+
+    p.then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceledCalled = true
+    );
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledCalled, true, "onFulfilled called");
+      assert.strictEqual(onRejectedCalled, false, "onRejected not called");
+      assert.strictEqual(onCanceledCalled, false, "onCanceled not called");
+    });
+  });
+
+  it("should not call the onCanceled handler for a promise that cancels after rejection", () => {
+    let onFulfilledCalled = false;
+    let onRejectedCalled = false;
+    let onCanceledCalled = false;
+
+    const p = new Promise((resolve, reject, cancel) => {
+      reject();
+      cancel();
+    });
+
+    p.then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceledCalled = true
+    );
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
+      assert.strictEqual(onRejectedCalled, true, "onRejected called");
+      assert.strictEqual(onCanceledCalled, false, "onCanceled not called");
     });
   });
 });
@@ -106,7 +192,7 @@ describe("Cancelation propagation through non-branching chains", () => {
     return delay().then(_ => {
       assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
       assert.strictEqual(onRejectedCalled, false, "onRejected not called");
-      assert(onCanceledCalled, "onCanceled called");
+      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
       assert(onCanceled2Called, "second onCanceled called");
     });
   });

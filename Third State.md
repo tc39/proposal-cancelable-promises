@@ -44,7 +44,7 @@ Furthermore, we do want cancelation to "propagate" similarly to how rejection pr
 
 ## Finally and catching cancelation
 
-As we alluded to in the previous paragraph, one way that cancelation is different from the existing states is how rarely it is appropriate to intercept it. Instead, the much more common thing to do is use `finally` blocks to react to the reality of cancelation and clean up related resources (such as the `stopLoadingSpinner()` in the example above). From there, the cancelation continues to propagate, tearing down `finally`-bound resources as it goes.
+As we alluded to in the previous paragraph, one way that cancelation is different from the existing states is how rarely it is appropriate to intercept cancelation specifically. Instead, the much more common thing to do is use `finally` blocks to react to the reality of cancelation—or any other completion—and clean up related resources (such as the `stopLoadingSpinner()` in the example above). From there, the cancelation continues to propagate, tearing down `finally`-bound resources as it goes.
 
 For symmetry, it makes sense to allow handling and recovering from cancelation (or more generally, reactions to cancelation which can then transform into either fulfillment or rejection). But in practice this is expected to be rarely used.
 
@@ -57,6 +57,8 @@ There are several other types of completions in the spec, all abrupt: viz. retur
 The reason is that return abrupt completions, unlike throw abrupt completions, do not propagate in the way we want cancelation to propagate. A return abrupt completion is transformed into a normal completion on the function call boundary; it does have the desirable property of skipping the rest of the function, and of triggering any finally blocks, but once it's done so it gets reified into a simple value that can be stored in a variable. To see how this would work, consider the following example, where `returnPromise` is a promise in the hypothetical "returned" state corresponding to a return abrupt completion, with return value `5`:
 
 ```js
+// HYPOTHETICAL: showing how a "returned state" promise has non-useful behavior
+
 async function inner() {
   try {
     await returnPromise;
@@ -116,3 +118,23 @@ const fulfilledPromise = Promise.cancel().catchCancel(() => {
 // Cancelation propagates unless explicitly reacted to:
 const canceledPromise2 = Promise.cancel().then(v => { ... }).catch(e => { ... }).finally(() => { ... });
 ```
+
+### `Promise.prototype.finally` implementation
+
+Since some people are confused and think that `promise.finally(f)` is equivalent to  `promise.then(f, f, f)`, we give a more accurate polyfill here:
+
+```js
+Promise.prototype.finally = function (onFinally) {
+    return this.then(
+        value => this.constructor.resolve(onFinally()).then(() => value),
+        exception => this.constructor.resolve(onFinally()).then(() => { throw exception; }),
+        reason => this.constructor.resolve(onFinally()).then(() => { throw cancel reason; })
+    );
+};
+```
+
+(This isn't rigorous at a spec-level, in many ways, but serves to illustrate the behavior.) Notably, like a syntactic `finally`, this implementation:
+
+- Does not pass any argument to the reaction code (i.e. to `onFinally`)
+- Does not affect the result, i.e. the resulting promise stays fulfilled/rejected/canceled in the same way, *unless*...
+- If the reaction code blows up (by `throw`ing/returning a rejected promise or `throw cancel`ing/returning a canceled promise), it propagates that new state onward, instead of the original state.

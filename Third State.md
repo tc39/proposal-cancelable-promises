@@ -48,6 +48,30 @@ As we alluded to in the previous paragraph, one way that cancelation is differen
 
 For symmetry, it makes sense to allow handling and recovering from cancelation (or more generally, reactions to cancelation which can then transform into either fulfillment or rejection). But in practice this is expected to be rarely used.
 
+## Unhandled cancelation
+
+Perhaps the biggest non-conceptual difference between cancelation and rejection is what happens once each propagates up the entire async call stack, to the top level where no derived promises are created. That is, compare:
+
+```js
+startSpinner();
+const fetchPromise = doNetworkRequestAgainstMockServer();
+const derivedPromise = fetchPromise.then(() => {
+  doSomeeething(); // oops, typo
+}).finally(stopSpinner);
+
+// will cause fetchPromise to cancel, thus derivedPromise will cancel
+cancelButton.onclick = () => cancelNetworkRequestSomehow();
+
+// will cause fetchPromise to fulfill, thus derivedPromise will be rejected
+respondButton.onclick = () => causeMockServerToRespond();
+```
+
+If the user clicks the `cancelButton`, causing the top-level `derivedPromise` to cancel, this is a non-event. The `finally` code will run, and then nothing else should happen: we initiated a cancelation with the expectation that nothing after the cancelation matters.
+
+In contrast, if the user clicks the `respondButton` and `fetchPromise` fulfills, the top-level `derivedPromise` will reject, due to the typo. The `finally` code will still run, and so cleanup will happen as appropriate—but we now have that most terrible of things, an _unhandled rejection_. This unhandled rejection needs to be surfaced, through developer tools and [application-facing events](https://html.spec.whatwg.org/#unhandled-promise-rejections). Whereas the "unhandled cancelation" is not an error at all, and there is no need for tools to collate such occurrences.
+
+This is, of course, all a consequence of our central thesis: _cancelation is not exceptional, and should not go through an error channel_.
+
 ## Completion values, and why this isn't "return"
 
 Promises are in many senses reified completion values, with fulfillment corresponding to normal completion, and rejection to an abrupt throw completion. This parallel becomes more obvious with async/await, where `await`ing a promise in a given state literally causes the corresponding completion to manifest.

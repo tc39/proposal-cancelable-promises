@@ -85,6 +85,7 @@ In contrast, both throw and cancelation completions need to propagate, unwinding
 When introducing the third state, the following modifications to promises fall out rather naturally:
 
 - A new executor argument, allowing the promise creator to move it into this third state: `new Promise((resolve, reject, cancel) => { ... })`. Like `resolve` and `reject`, this accepts an argument, the cancelation reason.
+- A new corresponding static method, `Promise.cancel(r)`, which is essentially `new Promise((_, __, cancel) => cancel(r))`.
 - A new argument to `Promise.prototype.then`, as the low-level interface for reacting to the third state: `promise.then(onFulfilled, onRejected, onCanceled)`.
 - A new helper method, `Promise.prototype.catchCancel`, for reacting to cancelations only: `promise.catchCancel(r => { ... })`.
 - A new helper method, `Promise.prototype.finally`, which allows reaction to any of the three states, but will by default propagate the current state (unless you `throw` inside of your finally handler).
@@ -94,3 +95,24 @@ Additionally, given the status of cancelation as a new completion record, on par
 - A new syntactic form, `try { ... } catch cancel(r) { ... }`, which catches the new cancelation completion record corresponding to the cancelation state.
 - A new syntactic form, `throw cancel r`, which exits the current execution context with one of these new cancelation completion records.
 - A new method, `Generator.prototype.cancel(r)`, for causing a generator function's `yield` statement to reify the cancelation completion.
+
+Finally, along the lines of "cancelation is not an error", we probably want to introduce a class analogous to `Error`, called `CancelReason`, which is what is typically used as a cancelation reason.
+
+With these in place, you get complete parity between the states, with syntactic forms for transitioning between them. For example:
+
+```js
+const canceledPromise = Promise.resolve().then(() => {
+  throw cancel new CancelReason("the user clicked 'stop'");
+});
+
+const rejectedPromise = Promise.cancel().catchCancel(() => {
+  throw new Error("bad things happened");
+});
+
+const fulfilledPromise = Promise.cancel().catchCancel(() => {
+  return 5;
+});
+
+// Cancelation propagates unless explicitly reacted to:
+const canceledPromise2 = Promise.cancel().then(v => { ... }).catch(e => { ... }).finally(() => { ... });
+```

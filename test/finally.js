@@ -1,5 +1,6 @@
-import Promise from "../lib/promise.js";
-import delay from "./helpers/delay.js";
+"use strict";
+const Promise = require("../lib/promise.js");
+const delay = require("./helpers/delay.js");
 const assert = require("assert");
 
 describe.skip("Promise.prototype.finally", () => {
@@ -7,8 +8,8 @@ describe.skip("Promise.prototype.finally", () => {
     let fulfilledArgs = null;
     let rejectedArgs = null;
 
-    Promise.resolve(5).finally((...args) => fulfilledArgs = args);
-    Promise.reject(new Error("boo")).finally((...args) => rejectedArgs = args);
+    Promise.resolve(5).finally(() => fulfilledArgs = [...arguments]);
+    Promise.reject(new Error("boo")).finally(() => rejectedArgs = [...arguments]);
 
     return delay().then(() => {
       assert.deepEqual(fulfilledArgs, [], "onFinally for the fulfilled promise should be called with no arguments");

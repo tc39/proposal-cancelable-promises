@@ -1,4 +1,5 @@
-import Promise from "../../lib/promise.js";
+"use strict";
+const Promise = require("../../lib/promise.js");
 
 module.exports = {
   resolved: v => Promise.resolve(v),

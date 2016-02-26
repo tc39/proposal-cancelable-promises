@@ -14,7 +14,7 @@ describe("The Promise constructor", () => {
   });
 });
 
-describe("Promise.prototype.then", () => {
+describe("Promise.prototype.then basics", () => {
   it("should only call onCanceled if the the promise is canceled", () => {
     let onFulfilledCalled = false;
     let onRejectedCalled = false;
@@ -220,6 +220,21 @@ describe("Cancelation state propagation through non-branching chains", () => {
     const p = new Promise((resolve, reject, cancel) => cancel(reason));
 
     p.then().then(undefined, undefined, arg => onCanceledArg = arg);
+
+    return delay().then(() => {
+      assert.strictEqual(onCanceledArg, reason);
+    });
+  });
+});
+
+describe("Using throw cancel to induce cancelation", () => {
+  it("should give a canceled promise from a fulfilled promise", () => {
+    const reason = { some: "reason" };
+    let onCanceledArg;
+
+    Promise.resolve()
+      .then(() => { throw cancel reason; })
+      .then(undefined, undefined, arg => onCanceledArg = arg);
 
     return delay().then(() => {
       assert.strictEqual(onCanceledArg, reason);

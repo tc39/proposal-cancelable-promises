@@ -227,14 +227,66 @@ describe("Cancelation state propagation through non-branching chains", () => {
   });
 });
 
-describe("Using throw cancel to induce cancelation", () => {
-  it("should give a canceled promise from a fulfilled promise", () => {
+describe("State transitions in non-branching promise chains", () => {
+  specify("throw cancel should give a canceled promise from a fulfilled promise", () => {
     const reason = { some: "reason" };
     let onCanceledArg;
 
     Promise.resolve()
       .then(() => { throw cancel reason; })
       .then(undefined, undefined, arg => onCanceledArg = arg);
+
+    return delay().then(() => {
+      assert.strictEqual(onCanceledArg, reason);
+    });
+  });
+
+  specify("throw cancel should give a canceled promise from a rejected promise", () => {
+    const reason = { some: "reason" };
+    let onCanceledArg;
+
+    Promise.reject()
+      .catch(() => { throw cancel reason; })
+      .then(undefined, undefined, arg => onCanceledArg = arg);
+
+    return delay().then(() => {
+      assert.strictEqual(onCanceledArg, reason);
+    });
+  });
+
+  specify("catchCancel should be able to transition to a fulfilled state", () => {
+    const value = { some: "value" };
+    let onFulfilledArg;
+
+    Promise.cancel({ some: "reason" })
+      .catchCancel(() => value)
+      .then(arg => onFulfilledArg = arg);
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledArg, value);
+    });
+  });
+
+  specify("catchCancel should be able to transition to a rejected state", () => {
+    const reason = new Error("boo");
+    let onRejectedArg;
+
+    Promise.cancel({ some: "reason" })
+      .catchCancel(() => { throw reason; })
+      .catch(arg => onRejectedArg = arg);
+
+    return delay().then(() => {
+      assert.strictEqual(onRejectedArg, reason);
+    });
+  });
+
+  specify("catchCancel should be able to throw cancel a different reason", () => {
+    const reason = { some: "other reason" };
+    let onCanceledArg;
+
+    Promise.cancel({ some: "reason" })
+      .catchCancel(() => { throw cancel reason; })
+      .catchCancel(arg => onCanceledArg = arg);
 
     return delay().then(() => {
       assert.strictEqual(onCanceledArg, reason);

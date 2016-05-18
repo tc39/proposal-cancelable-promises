@@ -79,6 +79,29 @@ describe("Task cancelation upward propagation (non-branching chains)", () => {
       assertCanceledWith(descendantResults, reason);
     });
   });
+
+  it("should cancel upward until it reaches a resolved promise", () => {
+    const reason = { some: "reason" };
+
+    const root = Task.resolve(5);
+    const generation1 = root.then(() => delay(100));
+    const generation2 = generation1.then();
+
+    const rootResults = getHandlerResultsStore(root, "root");
+    const generation1Results = getHandlerResultsStore(generation1, "generation1");
+    const generation2Results = getHandlerResultsStore(generation2, "generation2");
+
+    generation2.cancel(reason);
+
+    // This fails because generation1 isn't resolved by the time generation2.cancel() is called, since
+    // `() => delay(100)` only happens after a microtask. That seems bad and error-prone. Is there anything we can do?
+
+    return delay(150).then(() => {
+      assertFulfilledWith(rootResults, 5);
+      assertFulfilledWith(generation1Results, undefined);
+      assertCanceledWith(generation2Results, reason);
+    })
+  });
 });
 
 function getHandlerResultsStore(promise, label) {

@@ -188,27 +188,19 @@ describe("Cancelation state propagation through non-branching chains", () => {
 
     let onFulfilledCalled = false;
     let onRejectedCalled = false;
-    let onCanceledCalled = false;
     let onCanceled2Called = false;
 
-    p
-      .then(
-        () => onFulfilledCalled = true,
-        () => onRejectedCalled = true,
-        () => onCanceledCalled = true
-      )
-      .then(
-        () => onFulfilledCalled = true,
-        () => onRejectedCalled = true,
-        () => onCanceled2Called = true
-      );
+    p.then().then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceled2Called = true
+    );
 
     cancel();
 
     return delay().then(_ => {
       assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
       assert.strictEqual(onRejectedCalled, false, "onRejected not called");
-      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
       assert.strictEqual(onCanceled2Called, true, "second onCanceled called");
     });
   });

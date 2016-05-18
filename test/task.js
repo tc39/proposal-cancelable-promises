@@ -42,3 +42,45 @@ describe("Task.prototype.cancel basics", () => {
     });
   });
 });
+
+describe("Task cancelation upward propagation (non-branching chains)", () => {
+  it("should cancel an unresolved root task (depth 1 chain)", () => {
+    const reason = { some: "reason X" };
+    let onCanceledArg;
+    let onCanceled2Arg;
+
+    const root = new Task(() => {});
+    root.catchCancel(arg => onCanceledArg = arg);
+
+    const descendant = root.then();
+    descendant.catchCancel(arg => onCanceled2Arg = arg);
+    assert.notEqual(root, descendant, "Sanity check: the descendant should not equal the root");
+
+    descendant.cancel(reason);
+
+    return delay().then(() => {
+      assert.strictEqual(onCanceledArg, reason, "root onCanceled should be called with the reason");
+      assert.strictEqual(onCanceled2Arg, reason, "descendant onCanceled should be called with the reason");
+    });
+  });
+
+  it("should cancel an unresolved root task (depth 3 chain)", () => {
+    const reason = { some: "reason X" };
+    let onCanceledArg;
+    let onCanceled2Arg;
+
+    const root = new Task(() => {});
+    root.catchCancel(arg => onCanceledArg = arg);
+
+    const descendant = root.then().then().catchCancel();
+    descendant.catchCancel(arg => onCanceled2Arg = arg);
+    assert.notEqual(root, descendant, "Sanity check: the descendant should not equal the root");
+
+    descendant.cancel(reason);
+
+    return delay().then(() => {
+      assert.strictEqual(onCanceledArg, reason, "root onCanceled should be called with the reason");
+      assert.strictEqual(onCanceled2Arg, reason, "descendant onCanceled should be called with the reason");
+    });
+  });
+});

@@ -16,71 +16,110 @@ describe("Task.prototype.then basics", () => {
 describe("Task.prototype.cancel basics", () => {
   it("should cause the task to be canceled with the given reason (subscribe before)", () => {
     const reason = { some: "reason" };
-    let onCanceledArg;
 
     const t = new Task(() => {});
-    t.catchCancel(arg => onCanceledArg = arg);
+    const results = getHandlerResultsStore(t);
 
     t.cancel(reason);
 
     return delay().then(() => {
-      assert.strictEqual(onCanceledArg, reason, "onCanceled should be called with the reason");
+      assertCanceledWith(results, reason);
     });
   });
 
   it("should cause the task to be canceled with the given reason (subscribe after)", () => {
     const reason = { some: "reason" };
-    let onCanceledArg;
 
     const t = new Task(() => {});
-    t.catchCancel(arg => onCanceledArg = arg);
-
     t.cancel(reason);
 
+    const results = getHandlerResultsStore(t);
+
     return delay().then(() => {
-      assert.strictEqual(onCanceledArg, reason, "onCanceled should be called with the reason");
+      assertCanceledWith(results, reason);
     });
   });
 });
 
 describe("Task cancelation upward propagation (non-branching chains)", () => {
   it("should cancel an unresolved root task (depth 1 chain)", () => {
-    const reason = { some: "reason X" };
-    let onCanceledArg;
-    let onCanceled2Arg;
+    const reason = { some: "reason" };
 
     const root = new Task(() => {});
-    root.catchCancel(arg => onCanceledArg = arg);
+    const rootResults = getHandlerResultsStore(root, "root");
 
     const descendant = root.then();
-    descendant.catchCancel(arg => onCanceled2Arg = arg);
+    const descendantResults = getHandlerResultsStore(descendant, "descendant");
+
     assert.notEqual(root, descendant, "Sanity check: the descendant should not equal the root");
 
     descendant.cancel(reason);
 
     return delay().then(() => {
-      assert.strictEqual(onCanceledArg, reason, "root onCanceled should be called with the reason");
-      assert.strictEqual(onCanceled2Arg, reason, "descendant onCanceled should be called with the reason");
+      assertCanceledWith(rootResults, reason);
+      assertCanceledWith(descendantResults, reason);
     });
   });
 
   it("should cancel an unresolved root task (depth 3 chain)", () => {
-    const reason = { some: "reason X" };
-    let onCanceledArg;
-    let onCanceled2Arg;
+    const reason = { some: "reason" };
 
     const root = new Task(() => {});
-    root.catchCancel(arg => onCanceledArg = arg);
+    const rootResults = getHandlerResultsStore(root, "root");
 
     const descendant = root.then().then().catchCancel();
-    descendant.catchCancel(arg => onCanceled2Arg = arg);
+    const descendantResults = getHandlerResultsStore(descendant, "descendant");
+
     assert.notEqual(root, descendant, "Sanity check: the descendant should not equal the root");
 
     descendant.cancel(reason);
 
     return delay().then(() => {
-      assert.strictEqual(onCanceledArg, reason, "root onCanceled should be called with the reason");
-      assert.strictEqual(onCanceled2Arg, reason, "descendant onCanceled should be called with the reason");
+      assertCanceledWith(rootResults, reason);
+      assertCanceledWith(descendantResults, reason);
     });
   });
 });
+
+function getHandlerResultsStore(promise, label) {
+  const store = { label: label }; // SweetJS dies on object literal shorthand
+  promise.then(
+    arg => store.onFulfilledArg = arg,
+    arg => store.onRejectedArg = arg,
+    arg => store.onCanceledArg = arg
+  );
+  return store;
+}
+
+function assertFulfilledWith(resultsStore, value) {
+  const suffix = resultsStore.label === undefined ? "" : " for " + resultsStore.label;
+
+  assert.strictEqual(resultsStore.onFulfilledArg, value,
+    "onFulfilled should have been called with the specified value" + suffix);
+  assert.strictEqual(resultsStore.hasOwnProperty("onRejectedArg"), false,
+    "onRejected should not have been called" + suffix);
+  assert.strictEqual(resultsStore.hasOwnProperty("onCanceledArg"), false,
+    "onCanceled should not have been called" + suffix);
+}
+
+function assertRejectedWith(resultsStore, reason) {
+  const suffix = resultsStore.label === undefined ? "" : " for " + resultsStore.label;
+
+  assert.strictEqual(resultsStore.hasOwnProperty("onFulfilledArg"), false,
+    "onFulfilled should not have been called" + suffix);
+  assert.strictEqual(resultsStore.onRejectedArg, reason,
+    "onRejected should have been called with the specified value" + suffix);
+  assert.strictEqual(resultsStore.hasOwnProperty("onCanceledArg"), false,
+    "onCanceled should not have been called" + suffix);
+}
+
+function assertCanceledWith(resultsStore, reason) {
+  const suffix = resultsStore.label === undefined ? "" : " for " + resultsStore.label;
+
+  assert.strictEqual(resultsStore.hasOwnProperty("onFulfilledArg"), false,
+    "onFulfilled should not have been called" + suffix);
+  assert.strictEqual(resultsStore.hasOwnProperty("onRejectedArg"), false,
+    "onRejected should not have been called" + suffix);
+  assert.strictEqual(resultsStore.onCanceledArg, reason,
+    "onCanceled should have been called with the specified reason" + suffix);
+}

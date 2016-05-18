@@ -15,7 +15,30 @@ describe("The Promise constructor", () => {
 });
 
 describe("Promise.prototype.then basics", () => {
-  it("should only call onCanceled if the the promise is canceled", () => {
+  it("should only call onCanceled if the the promise is canceled (subscribe before)", () => {
+    let onFulfilledCalled = false;
+    let onRejectedCalled = false;
+    let onCanceledCalled = false;
+
+    let savedCancel;
+    const p = new Promise((resolve, reject, cancel) => savedCancel = cancel);
+
+    p.then(
+      () => onFulfilledCalled = true,
+      () => onRejectedCalled = true,
+      () => onCanceledCalled = true
+    );
+
+    savedCancel();
+
+    return delay().then(() => {
+      assert.strictEqual(onFulfilledCalled, false, "onFulfilled not called");
+      assert.strictEqual(onRejectedCalled, false, "onRejected not called");
+      assert.strictEqual(onCanceledCalled, true, "onCanceled called");
+    });
+  });
+
+  it("should only call onCanceled if the the promise is canceled (subscribe after)", () => {
     let onFulfilledCalled = false;
     let onRejectedCalled = false;
     let onCanceledCalled = false;

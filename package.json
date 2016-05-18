@@ -16,15 +16,15 @@
     "lib/"
   ],
   "scripts": {
-    "test-aplus": "promises-aplus-tests test/aplus-adapters/promise.js",
+    "test-aplus": "node test/helpers/test-aplus.js",
     "test-non-aplus": "mocha --compilers js:test/helpers/install-syntax.js test/*.js",
     "test": "npm run test-aplus && npm run test-non-aplus"
   },
   "devDependencies": {
     "mocha": "^2.4.5",
     "promises-aplus-tests": "^2.1.1",
-    "sweet.js": "^0.7.7",
-    "throw-catch-cancel-syntax": "^1.0.2"
+    "sweet.js": "^0.7.8",
+    "throw-catch-cancel-syntax": "^1.0.3"
   },
   "dependencies": {
     "especially": "^2.0.1"

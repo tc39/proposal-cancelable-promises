@@ -10,6 +10,71 @@ contributors: Domenic Denicola
 <link rel="stylesheet" href="https://bterlson.github.io/ecmarkup/elements.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_light.min.css">
 
-<emu-clause id="sec-promise-objects">
-  <h1>Promise Objects</h1>
+<emu-clause id="sec-completion-record-specification-type">
+  <h1>The Completion Record Specification Type</h1>
+
+  <p>The Completion type is a Record used to explain the runtime propagation of values and control flow such as the behaviour of statements (`break`, `continue`, `return`<del> and `throw`</del><ins>, `throw`, and `throw return`</ins>) that perform nonlocal transfers of control.</p>
+  <p>Values of the Completion type are Record values whose fields are defined as by <emu-xref href="#table-8"></emu-xref>. Such values are referred to as <dfn>Completion Record</dfn>s.</p>
+  <emu-table id="table-8" caption="Completion Record Fields">
+    <table>
+      <tbody>
+      <tr>
+        <th>
+          Field
+        </th>
+        <th>
+          Value
+        </th>
+        <th>
+          Meaning
+        </th>
+      </tr>
+      <tr>
+        <td>
+          [[Type]]
+        </td>
+        <td>
+          One of ~normal~, ~break~, ~continue~, ~return~, <del>or ~throw~</del><ins>~throw~, or ~throw return~</ins>
+        </td>
+        <td>
+          The type of completion that occurred.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          [[Value]]
+        </td>
+        <td>
+          any ECMAScript language value or ~empty~
+        </td>
+        <td>
+          The value that was produced.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          [[Target]]
+        </td>
+        <td>
+          any ECMAScript string or ~empty~
+        </td>
+        <td>
+          The target label for directed control transfers.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </emu-table>
+
+  <p>The term &ldquo;<dfn>abrupt completion</dfn>&rdquo; refers to any completion with a [[Type]] value other than ~normal~.</p>
+
+  <emu-clause id="sec-updateempty" aoid="UpdateEmpty">
+    <h1>UpdateEmpty ( _completionRecord_, _value_)</h1>
+    <p>The abstract operation UpdateEmpty with arguments _completionRecord_ and _value_ performs the following steps:</p>
+    <emu-alg>
+      1. Assert: If _completionRecord_.[[Type]] is either ~return~<del> or ~throw~</del><ins>, ~throw~, or ~throw return~</ins>, then _completionRecord_.[[Value]] is not ~empty~.
+      1. If _completionRecord_.[[Value]] is not ~empty~, return Completion(_completionRecord_).
+      1. Return Completion{[[Type]]: _completionRecord_.[[Type]], [[Value]]: _value_, [[Target]]: _completionRecord_.[[Target]] }.
+    </emu-alg>
+  </emu-clause>
 </emu-clause>

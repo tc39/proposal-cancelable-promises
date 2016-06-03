@@ -1,8 +1,12 @@
 {
   "private": true,
   "name": "cancelable-promise",
-  "description": "Cancelable promises proposal for ECMAScript",
+  "description": "Cancelable promises proposal for JavaScript",
   "keywords": [
+    "tc39",
+    "javascript",
+    "ecmascript",
+    "spec",
     "promise",
     "promises-aplus",
     "cancelable promises",
@@ -17,11 +21,13 @@
     "lib/"
   ],
   "scripts": {
+    "spec": "ecmarkup spec.html out/index.html",
     "test-aplus": "node test/helpers/test-aplus.js",
     "test-non-aplus": "mocha --compilers js:test/helpers/install-syntax.js test/*.js",
     "test": "npm run test-aplus && npm run test-non-aplus"
   },
   "devDependencies": {
+    "ecmarkup": "^3.2.6",
     "mocha": "^2.4.5",
     "promises-aplus-tests": "^2.1.1",
     "sweet.js": "^0.7.8",

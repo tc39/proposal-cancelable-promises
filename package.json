@@ -1,6 +1,7 @@
 {
+  "private": true,
   "name": "cancelable-promise",
-  "description": "Prototyping cancelable promises",
+  "description": "Cancelable promises proposal for ECMAScript",
   "keywords": [
     "promise",
     "promises-aplus",
@@ -11,7 +12,7 @@
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "WTFPL",
   "repository": "domenic/cancelable-promise",
-  "main": "lib/cancelable-promise.js",
+  "main": "lib/promise.js",
   "files": [
     "lib/"
   ],

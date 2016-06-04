@@ -1,10 +1,693 @@
 <!doctype html>
-<head><meta charset="utf-8"><title>Cancelable Promises</title><script type="application/json" id="menu-search-biblio">[{"type":"clause","id":"sec-promise-objects","aoid":null,"title":"Promise Objects","number":"1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Objects"}]</script></head><body><div id="menu-toggle">☰</div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-promise-objects" title="Promise Objects"><span class="secnum">1</span> Promise Objects</a></li></ol></div></div><h1 class="version">Stage 1 Draft / June 3, 2016</h1><h1 class="title">Cancelable Promises</h1>
+<head><meta charset="utf-8"><title>Cancelable Promises</title><script type="application/json" id="menu-search-biblio">[{"type":"clause","id":"","aoid":null,"title":"Introduction","number":"","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Introduction"},{"type":"clause","id":"sec-completion-record-specification-type","aoid":null,"title":"The Completion Record Specification Type","number":"1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"The Completion Record Specification Type"},{"type":"op","aoid":"UpdateEmpty","refId":"sec-updateempty","location":"","key":"UpdateEmpty"},{"type":"clause","id":"sec-updateempty","aoid":"UpdateEmpty","title":"UpdateEmpty ( _completionRecord_, _value_)","number":"1.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"UpdateEmpty ( _completionRecord_, _value_)"},{"type":"clause","id":"sec-promise-objects","aoid":null,"title":"Promise Objects","number":"2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Objects"},{"type":"clause","id":"sec-promise-abstract-operations","aoid":null,"title":"Promise Abstract Operations","number":"2.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Abstract Operations"},{"type":"clause","id":"sec-promisecapability-records","aoid":null,"title":"PromiseCapability Records","number":"2.1.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"PromiseCapability Records"},{"type":"op","aoid":"IfAbruptRejectPromise","refId":"sec-ifabruptrejectpromise","location":"","key":"IfAbruptRejectPromise"},{"type":"clause","id":"sec-ifabruptrejectpromise","aoid":"IfAbruptRejectPromise","title":"IfAbruptRejectPromise ( _value_, _capability_ )","number":"2.1.1.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"IfAbruptRejectPromise ( _value_, _capability_ )"},{"type":"clause","id":"sec-promisereaction-records","aoid":null,"title":"PromiseReaction Records","number":"2.1.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"PromiseReaction Records"},{"type":"op","aoid":"CreateResolvingFunctions","refId":"sec-createresolvingfunctions","location":"","key":"CreateResolvingFunctions"},{"type":"clause","id":"sec-createresolvingfunctions","aoid":"CreateResolvingFunctions","title":"CreateResolvingFunctions ( _promise_ )","number":"2.1.3","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"CreateResolvingFunctions ( _promise_ )"},{"type":"clause","id":"sec-promise-cancel-functions","aoid":null,"title":"Promise Cancel Functions","number":"2.1.3.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Cancel Functions"},{"type":"clause","id":"sec-promise-reject-functions","aoid":null,"title":"Promise Reject Functions","number":"2.1.3.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Reject Functions"},{"type":"clause","id":"sec-promise-resolve-functions","aoid":null,"title":"Promise Resolve Functions","number":"2.1.3.3","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Resolve Functions"},{"type":"op","aoid":"CancelPromise","refId":"sec-cancelpromise","location":"","key":"CancelPromise"},{"type":"clause","id":"sec-cancelpromise","aoid":"CancelPromise","title":"CancelPromise ( _promise_, _cancelation_ )","number":"2.1.4","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"CancelPromise ( _promise_, _cancelation_ )"},{"type":"op","aoid":"FulfillPromise","refId":"sec-fulfillpromise","location":"","key":"FulfillPromise"},{"type":"clause","id":"sec-fulfillpromise","aoid":"FulfillPromise","title":"FulfillPromise ( _promise_, _value_ )","number":"2.1.5","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"FulfillPromise ( _promise_, _value_ )"},{"type":"op","aoid":"NewPromiseCapability","refId":"sec-newpromisecapability","location":"","key":"NewPromiseCapability"},{"type":"clause","id":"sec-newpromisecapability","aoid":"NewPromiseCapability","title":"NewPromiseCapability ( _C_ )","number":"2.1.6","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"NewPromiseCapability ( _C_ )"},{"type":"clause","id":"sec-getcapabilitiesexecutor-functions","aoid":null,"title":"GetCapabilitiesExecutor Functions","number":"2.1.6.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"GetCapabilitiesExecutor Functions"},{"type":"op","aoid":"IsPromise","refId":"sec-ispromise","location":"","key":"IsPromise"},{"type":"clause","id":"sec-ispromise","aoid":"IsPromise","title":"IsPromise ( _x_ )","number":"2.1.7","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"IsPromise ( _x_ )"},{"type":"op","aoid":"RejectPromise","refId":"sec-rejectpromise","location":"","key":"RejectPromise"},{"type":"clause","id":"sec-rejectpromise","aoid":"RejectPromise","title":"RejectPromise ( _promise_, _reason_ )","number":"2.1.8","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"RejectPromise ( _promise_, _reason_ )"},{"type":"op","aoid":"TriggerPromiseReactions","refId":"sec-triggerpromisereactions","location":"","key":"TriggerPromiseReactions"},{"type":"clause","id":"sec-triggerpromisereactions","aoid":"TriggerPromiseReactions","title":"TriggerPromiseReactions ( _reactions_, _argument_ )","number":"2.1.9","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"TriggerPromiseReactions ( _reactions_, _argument_ )"},{"type":"op","aoid":"HostPromiseRejectionTracker","refId":"sec-host-promise-rejection-tracker","location":"","key":"HostPromiseRejectionTracker"},{"type":"clause","id":"sec-host-promise-rejection-tracker","aoid":"HostPromiseRejectionTracker","title":"HostPromiseRejectionTracker ( _promise_, _operation_ )","number":"2.1.10","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"HostPromiseRejectionTracker ( _promise_, _operation_ )"},{"type":"clause","id":"sec-promise-jobs","aoid":null,"title":"Promise Jobs","number":"2.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise Jobs"},{"type":"op","aoid":"PromiseReactionJob","refId":"sec-promisereactionjob","location":"","key":"PromiseReactionJob"},{"type":"clause","id":"sec-promisereactionjob","aoid":"PromiseReactionJob","title":"PromiseReactionJob ( _reaction_, _argument_ )","number":"2.2.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"PromiseReactionJob ( _reaction_, _argument_ )"},{"type":"op","aoid":"PromiseResolveThenableJob","refId":"sec-promiseresolvethenablejob","location":"","key":"PromiseResolveThenableJob"},{"type":"clause","id":"sec-promiseresolvethenablejob","aoid":"PromiseResolveThenableJob","title":"PromiseResolveThenableJob ( _promiseToResolve_, _thenable_, _then_)","number":"2.2.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"PromiseResolveThenableJob ( _promiseToResolve_, _thenable_, _then_)"},{"type":"clause","id":"sec-promise-constructor","aoid":null,"title":"The Promise Constructor","number":"2.3","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"The Promise Constructor"},{"type":"clause","id":"sec-promise-executor","aoid":null,"title":"Promise ( _executor_ )","number":"2.3.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise ( _executor_ )"},{"type":"clause","id":"sec-properties-of-the-promise-constructor","aoid":null,"title":"Properties of the Promise Constructor","number":"2.4","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Properties of the Promise Constructor"},{"type":"clause","id":"sec-promise.all","aoid":null,"title":"Promise.all ( _iterable_ )","number":"2.4.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.all ( _iterable_ )"},{"type":"op","aoid":"PerformPromiseAll","refId":"sec-performpromiseall","location":"","key":"PerformPromiseAll"},{"type":"clause","id":"sec-performpromiseall","aoid":"PerformPromiseAll","title":"Runtime Semantics: PerformPromiseAll( _iteratorRecord_, _constructor_, _resultCapability_)","number":"2.4.1.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Runtime Semantics: PerformPromiseAll( _iteratorRecord_, _constructor_, _resultCapability_)"},{"type":"clause","id":"sec-promise.all-resolve-element-functions","aoid":null,"title":"Promise.all Resolve Element Functions","number":"2.4.1.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.all Resolve Element Functions"},{"type":"clause","id":"sec-promise.prototype","aoid":null,"title":"Promise.prototype","number":"2.4.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype"},{"type":"clause","id":"sec-promise.race","aoid":null,"title":"Promise.race ( _iterable_ )","number":"2.4.3","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.race ( _iterable_ )"},{"type":"op","aoid":"PerformPromiseRace","refId":"sec-performpromiserace","location":"","key":"PerformPromiseRace"},{"type":"clause","id":"sec-performpromiserace","aoid":"PerformPromiseRace","title":"Runtime Semantics: PerformPromiseRace ( _iteratorRecord_, _promiseCapability_, _C_ )","number":"2.4.3.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Runtime Semantics: PerformPromiseRace ( _iteratorRecord_, _promiseCapability_, _C_ )"},{"type":"clause","id":"sec-promise.reject","aoid":null,"title":"Promise.cancel ( _c_ )","number":"2.4.4","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.cancel ( _c_ )"},{"type":"clause","id":"sec-promise.reject","aoid":null,"title":"Promise.reject ( _r_ )","number":"2.4.5","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.reject ( _r_ )"},{"type":"clause","id":"sec-promise.resolve","aoid":null,"title":"Promise.resolve ( _x_ )","number":"2.4.6","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.resolve ( _x_ )"},{"type":"clause","id":"sec-get-promise-@@species","aoid":null,"title":"get Promise [ @@species ]","number":"2.4.7","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"get Promise [ @@species ]"},{"type":"clause","id":"sec-properties-of-the-promise-prototype-object","aoid":null,"title":"Properties of the Promise Prototype Object","number":"2.5","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Properties of the Promise Prototype Object"},{"type":"clause","id":"sec-promise.prototype.catch","aoid":null,"title":"Promise.prototype.catch ( _onRejected_ )","number":"2.5.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype.catch ( _onRejected_ )"},{"type":"clause","id":"sec-promise.prototype.catchreturn","aoid":null,"title":"Promise.prototype.catchReturn ( _onCanceled_ )","number":"2.5.2","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype.catchReturn ( _onCanceled_ )"},{"type":"clause","id":"sec-promise.prototype.constructor","aoid":null,"title":"Promise.prototype.constructor","number":"2.5.3","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype.constructor"},{"type":"clause","id":"sec-promise.prototype.then","aoid":null,"title":"Promise.prototype.then ( _onFulfilled_, _onRejected_, _onCanceled_ )","number":"2.5.4","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype.then ( _onFulfilled_, _onRejected_, _onCanceled_ )"},{"type":"op","aoid":"PerformPromiseThen","refId":"sec-performpromisethen","location":"","key":"PerformPromiseThen"},{"type":"clause","id":"sec-performpromisethen","aoid":"PerformPromiseThen","title":"PerformPromiseThen ( _promise_, _onFulfilled_, _onRejected_, _onCanceled_, _resultCapability_ )","number":"2.5.4.1","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"PerformPromiseThen ( _promise_, _onFulfilled_, _onRejected_, _onCanceled_, _resultCapability_ )"},{"type":"clause","id":"sec-promise.prototype-@@tostringtag","aoid":null,"title":"Promise.prototype [ @@toStringTag ]","number":"2.5.5","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Promise.prototype [ @@toStringTag ]"},{"type":"clause","id":"sec-properties-of-promise-instances","aoid":null,"title":"Properties of Promise Instances","number":"2.6","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Properties of Promise Instances"},{"type":"table","id":"table-8","number":1,"caption":"Table 1: Completion Record Fields","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Table 1: Completion Record Fields"},{"type":"table","id":"table-57","number":2,"caption":"Table 2: PromiseCapability Record Fields","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Table 2: PromiseCapability Record Fields"},{"type":"table","id":"table-58","number":3,"caption":"Table 3: PromiseReaction Record Fields","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Table 3: PromiseReaction Record Fields"},{"type":"table","id":"table-59","number":4,"caption":"Table 4: Internal Slots of Promise Instances","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Table 4: Internal Slots of Promise Instances"},{"type":"term","term":"Completion Record","refId":"sec-completion-record-specification-type","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"Completion Record"},{"type":"term","term":"abrupt completion","refId":"sec-completion-record-specification-type","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"abrupt completion"},{"type":"term","term":"%Promise%","refId":"sec-promise-constructor","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"%Promise%"},{"type":"term","term":"%PromisePrototype%","refId":"sec-properties-of-the-promise-prototype-object","namespace":"https://domenic.github.io/cancelable-promise/","location":"","key":"%PromisePrototype%"}]</script></head><body><div id="menu-toggle">☰</div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle-none"></span><a href="#" title="Introduction"><span class="secnum"></span> Introduction</a></li><li><span class="item-toggle">◢</span><a href="#sec-completion-record-specification-type" title="The Completion Record Specification Type"><span class="secnum">1</span> The Completion Record Specification Type</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-updateempty" title="UpdateEmpty ( _completionRecord_, _value_)"><span class="secnum">1.1</span> UpdateEmpty ( <var>completionRecord</var>, <var>value</var>)</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-promise-objects" title="Promise Objects"><span class="secnum">2</span> Promise Objects</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-promise-abstract-operations" title="Promise Abstract Operations"><span class="secnum">2.1</span> Promise Abstract Operations</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-promisecapability-records" title="PromiseCapability Records"><span class="secnum">2.1.1</span> PromiseCapability Records</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-ifabruptrejectpromise" title="IfAbruptRejectPromise ( _value_, _capability_ )"><span class="secnum">2.1.1.1</span> IfAbruptRejectPromise ( <var>value</var>, <var>capability</var> )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-promisereaction-records" title="PromiseReaction Records"><span class="secnum">2.1.2</span> PromiseReaction Records</a></li><li><span class="item-toggle">◢</span><a href="#sec-createresolvingfunctions" title="CreateResolvingFunctions ( _promise_ )"><span class="secnum">2.1.3</span> CreateResolvingFunctions ( <var>promise</var> )</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-promise-cancel-functions" title="Promise Cancel Functions"><span class="secnum">2.1.3.1</span> Promise Cancel Functions</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise-reject-functions" title="Promise Reject Functions"><span class="secnum">2.1.3.2</span> Promise Reject Functions</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise-resolve-functions" title="Promise Resolve Functions"><span class="secnum">2.1.3.3</span> Promise Resolve Functions</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-cancelpromise" title="CancelPromise ( _promise_, _cancelation_ )"><span class="secnum">2.1.4</span> CancelPromise ( <var>promise</var>, <var>cancelation</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-fulfillpromise" title="FulfillPromise ( _promise_, _value_ )"><span class="secnum">2.1.5</span> FulfillPromise ( <var>promise</var>, <var>value</var> )</a></li><li><span class="item-toggle">◢</span><a href="#sec-newpromisecapability" title="NewPromiseCapability ( _C_ )"><span class="secnum">2.1.6</span> NewPromiseCapability ( <var>C</var> )</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-getcapabilitiesexecutor-functions" title="GetCapabilitiesExecutor Functions"><span class="secnum">2.1.6.1</span> GetCapabilitiesExecutor Functions</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-ispromise" title="IsPromise ( _x_ )"><span class="secnum">2.1.7</span> IsPromise ( <var>x</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-rejectpromise" title="RejectPromise ( _promise_, _reason_ )"><span class="secnum">2.1.8</span> RejectPromise ( <var>promise</var>, <var>reason</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-triggerpromisereactions" title="TriggerPromiseReactions ( _reactions_, _argument_ )"><span class="secnum">2.1.9</span> TriggerPromiseReactions ( <var>reactions</var>, <var>argument</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-host-promise-rejection-tracker" title="HostPromiseRejectionTracker ( _promise_, _operation_ )"><span class="secnum">2.1.10</span> HostPromiseRejectionTracker ( <var>promise</var>, <var>operation</var> )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-promise-jobs" title="Promise Jobs"><span class="secnum">2.2</span> Promise Jobs</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-promisereactionjob" title="PromiseReactionJob ( _reaction_, _argument_ )"><span class="secnum">2.2.1</span> PromiseReactionJob ( <var>reaction</var>, <var>argument</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-promiseresolvethenablejob" title="PromiseResolveThenableJob ( _promiseToResolve_, _thenable_, _then_)"><span class="secnum">2.2.2</span> PromiseResolveThenableJob ( <var>promiseToResolve</var>, <var>thenable</var>, <var>then</var>)</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-promise-constructor" title="The Promise Constructor"><span class="secnum">2.3</span> The Promise Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-promise-executor" title="Promise ( _executor_ )"><span class="secnum">2.3.1</span> Promise ( <var>executor</var> )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-the-promise-constructor" title="Properties of the Promise Constructor"><span class="secnum">2.4</span> Properties of the Promise Constructor</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-promise.all" title="Promise.all ( _iterable_ )"><span class="secnum">2.4.1</span> Promise.all ( <var>iterable</var> )</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-performpromiseall" title="Runtime Semantics: PerformPromiseAll( _iteratorRecord_, _constructor_, _resultCapability_)"><span class="secnum">2.4.1.1</span> RS: PerformPromiseAll( <var>iteratorRecord</var>, <var>constructor</var>, <var>resultCapability</var>)</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise.all-resolve-element-functions" title="Promise.all Resolve Element Functions"><span class="secnum">2.4.1.2</span> Promise.all Resolve Element Functions</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-promise.prototype" title="Promise.prototype"><span class="secnum">2.4.2</span> Promise.prototype</a></li><li><span class="item-toggle">◢</span><a href="#sec-promise.race" title="Promise.race ( _iterable_ )"><span class="secnum">2.4.3</span> Promise.race ( <var>iterable</var> )</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-performpromiserace" title="Runtime Semantics: PerformPromiseRace ( _iteratorRecord_, _promiseCapability_, _C_ )"><span class="secnum">2.4.3.1</span> RS: PerformPromiseRace ( <var>iteratorRecord</var>, <var>promiseCapability</var>, <var>C</var> )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-promise.reject" title="Promise.cancel ( _c_ )"><span class="secnum">2.4.4</span> Promise.cancel ( <var>c</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise.reject" title="Promise.reject ( _r_ )"><span class="secnum">2.4.5</span> Promise.reject ( <var>r</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise.resolve" title="Promise.resolve ( _x_ )"><span class="secnum">2.4.6</span> Promise.resolve ( <var>x</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-get-promise-@@species" title="get Promise [ @@species ]"><span class="secnum">2.4.7</span> get Promise [ @@species ]</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-the-promise-prototype-object" title="Properties of the Promise Prototype Object"><span class="secnum">2.5</span> Properties of the Promise Prototype Object</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-promise.prototype.catch" title="Promise.prototype.catch ( _onRejected_ )"><span class="secnum">2.5.1</span> Promise.prototype.catch ( <var>onRejected</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise.prototype.catchreturn" title="Promise.prototype.catchReturn ( _onCanceled_ )"><span class="secnum">2.5.2</span> Promise.prototype.catchReturn ( <var>onCanceled</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-promise.prototype.constructor" title="Promise.prototype.constructor"><span class="secnum">2.5.3</span> Promise.prototype.constructor</a></li><li><span class="item-toggle">◢</span><a href="#sec-promise.prototype.then" title="Promise.prototype.then ( _onFulfilled_, _onRejected_, _onCanceled_ )"><span class="secnum">2.5.4</span> Promise.prototype.then ( <var>onFulfilled</var>, <var>onRejected</var>, <var>onCanceled</var> )</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-performpromisethen" title="PerformPromiseThen ( _promise_, _onFulfilled_, _onRejected_, _onCanceled_, _resultCapability_ )"><span class="secnum">2.5.4.1</span> PerformPromiseThen ( <var>promise</var>, <var>onFulfilled</var>, <var>onRejected</var>, <var>onCanceled</var>, <var>resultCapability</var> )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-promise.prototype-@@tostringtag" title="Promise.prototype [ @@toStringTag ]"><span class="secnum">2.5.5</span> Promise.prototype [ @@toStringTag ]</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-properties-of-promise-instances" title="Properties of Promise Instances"><span class="secnum">2.6</span> Properties of Promise Instances</a></li></ol></li></ol></div></div><h1 class="version">Stage 1 Draft / June 4, 2016</h1><h1 class="title">Cancelable Promises</h1>
 <script src="https://bterlson.github.io/ecmarkup/ecmarkup.js" defer=""></script>
 <link rel="stylesheet" href="https://bterlson.github.io/ecmarkup/elements.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_light.min.css">
 
+<emu-intro>
+  <h1><span class="secnum"></span>Introduction<span class="utils"><span class="anchor"><a href="#">#</a></span></span></h1>
+
+  <p>This is a work-in-progress formalization of the work in  <a href="https://github.com/domenic/cancelable-promise">domenic/cancelable-promise</a> and  <a href="https://github.com/zenparsing/es-cancel-token">zenparsing/es-cancel-token</a>. Much is left to do:</p>
+
+  <ul>
+    <li>Spec <code>Promise.all</code> and <code>Promise.race</code> behavior</li>
+    <li>Spec cancel tokens</li>
+    <li>Spec syntax for <code>throw return</code> and <code>catch return</code>.</li>
+  </ul>
+
+  <p>See also the [issues](https://github.com/domenic/cancelable-promise/issues), which contain many ongoing discussions and debates.</p>
+</emu-intro>
+
+<emu-clause id="sec-completion-record-specification-type">
+  <h1><span class="secnum">1</span>The Completion Record Specification Type<span class="utils"><span class="anchor"><a href="#sec-completion-record-specification-type">#</a></span></span></h1>
+
+  <p>The Completion type is a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> used to explain the runtime propagation of values and control flow such as the behaviour of statements (<code>break</code>, <code>continue</code>, <code>return</code><del> and <code>throw</code></del><ins>, <code>throw</code>, and <code>throw return</code></ins>) that perform nonlocal transfers of control.</p>
+  <p>Values of the Completion type are <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> values whose fields are defined as by  <emu-xref href="#table-8"><a href="#table-8">Table 1</a></emu-xref>. Such values are referred to as  <dfn>Completion Record</dfn>s.</p>
+  <emu-table id="table-8" caption="Completion Record Fields"><figure><figcaption>Table 1: Completion Record Fields</figcaption>
+    <table>
+      <tbody>
+      <tr>
+        <th>
+          Field
+        
+        </th>
+        <th>
+          Value
+        
+        </th>
+        <th>
+          Meaning
+        
+        </th>
+      </tr>
+      <tr>
+        <td>
+          [[Type]]
+        
+        </td>
+        <td>
+          One of <emu-const>normal</emu-const>, <emu-const>break</emu-const>, <emu-const>continue</emu-const>, <emu-const>return</emu-const>,  <del>or <emu-const>throw</emu-const></del><ins><emu-const>throw</emu-const>, or <emu-const>throw return</emu-const></ins>
+        </td>
+        <td>
+          The type of completion that occurred.
+        
+        </td>
+      </tr>
+      <tr>
+        <td>
+          [[Value]]
+        
+        </td>
+        <td>
+          any <emu-xref href="#sec-ecmascript-language-types"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-language-types">ECMAScript language value</a></emu-xref> or <emu-const>empty</emu-const>
+        
+        </td>
+        <td>
+          The value that was produced.
+        
+        </td>
+      </tr>
+      <tr>
+        <td>
+          [[Target]]
+        
+        </td>
+        <td>
+          any ECMAScript string or <emu-const>empty</emu-const>
+        
+        </td>
+        <td>
+          The target label for directed control transfers.
+        
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </figure></emu-table>
+
+  <p>The term “<dfn>abrupt completion</dfn>” refers to any completion with a [[Type]] value other than <emu-const>normal</emu-const>.</p>
+
+  <emu-clause id="sec-updateempty" aoid="UpdateEmpty">
+    <h1><span class="secnum">1.1</span>UpdateEmpty ( <var>completionRecord</var>, <var>value</var>)<span class="utils"><span class="anchor"><a href="#sec-updateempty">#</a></span></span></h1>
+    <p>The abstract operation UpdateEmpty with arguments <var>completionRecord</var> and <var>value</var> performs the following steps:</p>
+    <emu-alg><ol><li>Assert: If <var>completionRecord</var>.[[Type]] is either <emu-const>return</emu-const><del> or <emu-const>throw</emu-const></del><ins>, <emu-const>throw</emu-const>, or <emu-const>throw return</emu-const></ins>, then <var>completionRecord</var>.[[Value]] is not <emu-const>empty</emu-const>.</li><li>If <var>completionRecord</var>.[[Value]] is not <emu-const>empty</emu-const>, return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>completionRecord</var>).</li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>{[[Type]]: <var>completionRecord</var>.[[Type]], [[Value]]: <var>value</var>, [[Target]]: <var>completionRecord</var>.[[Target]] }.
+    </li></ol></emu-alg>
+  </emu-clause>
+</emu-clause>
+
 <emu-clause id="sec-promise-objects">
-  <h1><span class="secnum">1</span>Promise Objects<span class="utils"><span class="anchor"><a href="#sec-promise-objects">#</a></span></span></h1>
+  <h1><span class="secnum">2</span>Promise Objects<span class="utils"><span class="anchor"><a href="#sec-promise-objects">#</a></span></span></h1>
+  <p>A Promise is an object that is used as a placeholder for the eventual results of a deferred (and possibly asynchronous) computation.</p>
+  <p>Any Promise object is in one of four mutually exclusive states:  <em>fulfilled</em>,  <em>rejected</em><ins>,  <em>canceled</em></ins>, and  <em>pending</em>:</p>
+  <ul>
+    <li>
+      A promise <code>p</code> is fulfilled if  <code>p.then(f, r<ins>, c</ins>)</code> will immediately enqueue a Job to call the function <code>f</code>.
+    
+    </li>
+    <li>
+      A promise <code>p</code> is rejected if  <code>p.then(f, r<ins>, c</ins>)</code> will immediately enqueue a Job to call the function <code>r</code>.
+    
+    </li>
+    <li>
+      <ins>A promise <code>p</code> is canceled if <code>p.then(f, r, c)</code> will immediately enqueue a Job to call the function <code>c</code>.</ins>
+    </li>
+    <li>
+      A promise is pending if it is neither fulfilled nor rejected<ins> nor canceled</ins>.
+    
+    </li>
+  </ul>
+  <p>A promise is said to be  <em>settled</em> if it is not pending, i.e. if it is either fulfilled or rejected<ins> or canceled</ins>.</p>
+  <p>A promise is  <em>resolved</em> if it is settled or if it has been “locked in” to match the state of another promise. Attempting to resolve<del> or reject</del><ins>, reject, or cancel</ins> a resolved promise has no effect. A promise is  <em>unresolved</em> if it is not resolved. An unresolved promise is always in the pending state. A resolved promise may be pending, fulfilled<del> or rejected</del><ins>, rejected, or canceled</ins>.</p>
+
+  <emu-clause id="sec-promise-abstract-operations">
+    <h1><span class="secnum">2.1</span>Promise Abstract Operations<span class="utils"><span class="anchor"><a href="#sec-promise-abstract-operations">#</a></span></span></h1>
+
+    <!-- es6num="25.4.1.1" -->
+    <emu-clause id="sec-promisecapability-records">
+      <h1><span class="secnum">2.1.1</span>PromiseCapability Records<span class="utils"><span class="anchor"><a href="#sec-promisecapability-records">#</a></span></span></h1>
+      <p>A PromiseCapability is a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> value used to encapsulate a promise object along with the functions that are capable of resolving<del> or rejecting</del><ins>, rejecting, or canceling</ins> that promise object. PromiseCapability records are produced by the <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref> abstract operation.</p>
+      <p>PromiseCapability Records have the fields listed in  <emu-xref href="#table-57"><a href="#table-57">Table 2</a></emu-xref>.</p>
+      <emu-table id="table-57" caption="PromiseCapability Record Fields"><figure><figcaption>Table 2: PromiseCapability <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> Fields</figcaption>
+        <table>
+          <tbody>
+          <tr>
+            <th>
+              Field Name
+            
+            </th>
+            <th>
+              Value
+            
+            </th>
+            <th>
+              Meaning
+            
+            </th>
+          </tr>
+          <tr>
+            <td>
+              [[Promise]]
+            
+            </td>
+            <td>
+              An object
+            
+            </td>
+            <td>
+              An object that is usable as a promise.
+            
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Resolve]]
+            
+            </td>
+            <td>
+              A function object
+            
+            </td>
+            <td>
+              The function that is used to resolve the given promise object.
+            
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Reject]]
+            
+            </td>
+            <td>
+              A function object
+            
+            </td>
+            <td>
+              The function that is used to reject the given promise object.
+            
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <ins>[[Cancel]]</ins>
+            </td>
+            <td>
+              <ins>A function object</ins>
+            </td>
+            <td>
+              <ins>The function that is used to cancel the given promise object.</ins>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </figure></emu-table>
+
+      <!-- es6num="25.4.1.1.1" -->
+      <emu-clause id="sec-ifabruptrejectpromise" aoid="IfAbruptRejectPromise">
+        <h1><span class="secnum">2.1.1.1</span>IfAbruptRejectPromise ( <var>value</var>, <var>capability</var> )<span class="utils"><span class="anchor"><a href="#sec-ifabruptrejectpromise">#</a></span></span></h1>
+        <p>IfAbruptRejectPromise is a short hand for a sequence of algorithm steps that use a PromiseCapability record. An algorithm step of the form:</p>
+        <emu-alg><ol><li><emu-xref aoid="IfAbruptRejectPromise"><a href="#sec-ifabruptrejectpromise">IfAbruptRejectPromise</a></emu-xref>(<var>value</var>, <var>capability</var>).
+        </li></ol></emu-alg>
+        <p>means the same thing as:</p>
+        <emu-alg><ol><li>If <var>value</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then<ol><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>capability</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>value</var>.[[Value]] »).</li><li>Return <var>capability</var>.[[Promise]].</li></ol></li><li>Else if <var>value</var> is a <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">Completion Record</a></emu-xref>, let <var>value</var> be <var>value</var>.[[Value]].
+        </li></ol></emu-alg>
+      </emu-clause>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.2" -->
+    <emu-clause id="sec-promisereaction-records">
+      <h1><span class="secnum">2.1.2</span>PromiseReaction Records<span class="utils"><span class="anchor"><a href="#sec-promisereaction-records">#</a></span></span></h1>
+      <p>The PromiseReaction is a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> value used to store information about how a promise should react when it becomes resolved or rejected with a given value. PromiseReaction records are created by the <emu-xref aoid="PerformPromiseThen"><a href="#sec-performpromisethen">PerformPromiseThen</a></emu-xref> abstract operation, and are used by a <emu-xref aoid="PromiseReactionJob"><a href="#sec-promisereactionjob">PromiseReactionJob</a></emu-xref>.</p>
+      <p>PromiseReaction records have the fields listed in  <emu-xref href="#table-58"><a href="#table-58">Table 3</a></emu-xref>.</p>
+      <emu-table id="table-58" caption="PromiseReaction Record Fields"><figure><figcaption>Table 3: PromiseReaction <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> Fields</figcaption>
+        <table>
+          <tbody>
+          <tr>
+            <th>
+              Field Name
+            
+            </th>
+            <th>
+              Value
+            
+            </th>
+            <th>
+              Meaning
+            
+            </th>
+          </tr>
+          <tr>
+            <td>
+              [[Capabilities]]
+            
+            </td>
+            <td>
+              A PromiseCapability record
+            
+            </td>
+            <td>
+              The capabilities of the promise for which this record provides a reaction handler.
+            
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Type]]
+            
+            </td>
+            <td>
+              Either <code>"Fulfill"</code><del> or <code>"Reject"</code></del><ins>, <code>"Reject"</code>, or <code>"Cancel"</code></ins>.
+            
+            </td>
+            <td>
+              The [[Type]] is used when [[Handler]] is <emu-val>undefined</emu-val> to allow for behavior specific to the settlement type.
+            
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Handler]]
+            
+            </td>
+            <td>
+              A function object or <emu-val>undefined</emu-val>.
+            
+            </td>
+            <td>
+              The function that should be applied to the incoming value, and whose return value will govern what happens to the derived promise. If [[Handler]] is <emu-val>undefined</emu-val>, a function that depends on the value of [[Type]] will be used instead.
+            
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </figure></emu-table>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.3" -->
+    <emu-clause id="sec-createresolvingfunctions" aoid="CreateResolvingFunctions">
+      <h1><span class="secnum">2.1.3</span>CreateResolvingFunctions ( <var>promise</var> )<span class="utils"><span class="anchor"><a href="#sec-createresolvingfunctions">#</a></span></span></h1>
+      <p>When CreateResolvingFunctions is performed with argument <var>promise</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Let <var>alreadyResolved</var> be a new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Value]]: <emu-val>false</emu-val> }.</li><li>Let <var>resolve</var> be a new built-in function object as defined in Promise Resolve Functions (<emu-xref href="#sec-promise-resolve-functions"><a href="#sec-promise-resolve-functions">2.1.3.3</a></emu-xref>).</li><li>Set <var>resolve</var>.[[Promise]] to <var>promise</var>.</li><li>Set <var>resolve</var>.[[AlreadyResolved]] to <var>alreadyResolved</var>.</li><li>Let <var>reject</var> be a new built-in function object as defined in Promise Reject Functions (<emu-xref href="#sec-promise-reject-functions"><a href="#sec-promise-reject-functions">2.1.3.2</a></emu-xref>).</li><li>Set <var>reject</var>.[[Promise]] to <var>promise</var>.</li><li>Set <var>reject</var>.[[AlreadyResolved]] to <var>alreadyResolved</var>.</li><li><ins>Let <var>cancel</var> be a new built-in function object as defined in Promise Cancel Functions (<emu-xref href="#sec-promise-cancel-functions"><a href="#sec-promise-cancel-functions">2.1.3.1</a></emu-xref>).</ins></li><li><ins>Set <var>cancel</var>.[[Promise]] to <var>promise</var>.</ins></li><li><ins>Set <var>cancel</var>.[[AlreadyResolved]] to <var>alreadyResolved</var>.</ins></li><li>Return a new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Resolve]]: <var>resolve</var>, [[Reject]]: <var>reject</var><ins>, [[Cancel]]: <var>cancel</var></ins> }.
+      </li></ol></emu-alg>
+
+      <emu-clause id="sec-promise-cancel-functions">
+        <h1><span class="secnum">2.1.3.1</span><ins>Promise Cancel Functions</ins><span class="utils"><span class="anchor"><a href="#sec-promise-cancel-functions">#</a></span></span></h1>
+        <p>A promise cancel function is an anonymous built-in function that has [[Promise]] and [[AlreadyResolved]] internal slots.</p>
+        <p>When a promise cancel function <var>F</var> is called with argument <var>reason</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Assert: <var>F</var> has a [[Promise]] internal slot whose value is an Object.</li><li>Let <var>promise</var> be the value of <var>F</var>.[[Promise]].</li><li>Let <var>alreadyResolved</var> be the value of <var>F</var>.[[AlreadyResolved]].</li><li>If <var>alreadyResolved</var>.[[Value]] is <emu-val>true</emu-val>, return <emu-val>undefined</emu-val>.</li><li>Set <var>alreadyResolved</var>.[[Value]] to <emu-val>true</emu-val>.</li><li>Return <emu-xref aoid="CancelPromise"><a href="#sec-cancelpromise">CancelPromise</a></emu-xref>(<var>promise</var>, <var>reason</var>).
+        </li></ol></emu-alg>
+        <p>The <code>length</code> property of a promise cancel function is 1.</p>
+      </emu-clause>
+
+      <!-- es6num="25.4.1.3.1" -->
+      <emu-clause id="sec-promise-reject-functions">
+        <h1><span class="secnum">2.1.3.2</span>Promise Reject Functions<span class="utils"><span class="anchor"><a href="#sec-promise-reject-functions">#</a></span></span></h1>
+        <p>A promise reject function is an anonymous built-in function that has [[Promise]] and [[AlreadyResolved]] internal slots.</p>
+        <p>When a promise reject function <var>F</var> is called with argument <var>reason</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Assert: <var>F</var> has a [[Promise]] internal slot whose value is an Object.</li><li>Let <var>promise</var> be the value of <var>F</var>.[[Promise]].</li><li>Let <var>alreadyResolved</var> be the value of <var>F</var>.[[AlreadyResolved]].</li><li>If <var>alreadyResolved</var>.[[Value]] is <emu-val>true</emu-val>, return <emu-val>undefined</emu-val>.</li><li>Set <var>alreadyResolved</var>.[[Value]] to <emu-val>true</emu-val>.</li><li>Return <emu-xref aoid="RejectPromise"><a href="#sec-rejectpromise">RejectPromise</a></emu-xref>(<var>promise</var>, <var>reason</var>).
+        </li></ol></emu-alg>
+        <p>The <code>length</code> property of a promise reject function is 1.</p>
+      </emu-clause>
+
+      <!-- es6num="25.4.1.3.2" -->
+      <emu-clause id="sec-promise-resolve-functions">
+        <h1><span class="secnum">2.1.3.3</span>Promise Resolve Functions<span class="utils"><span class="anchor"><a href="#sec-promise-resolve-functions">#</a></span></span></h1>
+        <p>A promise resolve function is an anonymous built-in function that has [[Promise]] and [[AlreadyResolved]] internal slots.</p>
+        <p>When a promise resolve function <var>F</var> is called with argument <var>resolution</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Assert: <var>F</var> has a [[Promise]] internal slot whose value is an Object.</li><li>Let <var>promise</var> be the value of <var>F</var>.[[Promise]].</li><li>Let <var>alreadyResolved</var> be the value of <var>F</var>.[[AlreadyResolved]].</li><li>If <var>alreadyResolved</var>.[[Value]] is <emu-val>true</emu-val>, return <emu-val>undefined</emu-val>.</li><li>Set <var>alreadyResolved</var>.[[Value]] to <emu-val>true</emu-val>.</li><li>If <emu-xref aoid="SameValue"><a href="https://tc39.github.io/ecma262/#sec-samevalue">SameValue</a></emu-xref>(<var>resolution</var>, <var>promise</var>) is <emu-val>true</emu-val>, then<ol><li>Let <var>selfResolutionError</var> be a newly created <emu-val>TypeError</emu-val> object.</li><li>Return <emu-xref aoid="RejectPromise"><a href="#sec-rejectpromise">RejectPromise</a></emu-xref>(<var>promise</var>, <var>selfResolutionError</var>).</li></ol></li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>resolution</var>) is not Object, then<ol><li>Return <emu-xref aoid="FulfillPromise"><a href="#sec-fulfillpromise">FulfillPromise</a></emu-xref>(<var>promise</var>, <var>resolution</var>).</li></ol></li><li>Let <var>then</var> be <emu-xref aoid="Get"><a href="https://tc39.github.io/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>resolution</var>, <code>"then"</code>).</li><li><del>If <var>then</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then</del><ol><li><del>Return <emu-xref aoid="RejectPromise"><a href="#sec-rejectpromise">RejectPromise</a></emu-xref>(<var>promise</var>, <var>then</var>.[[Value]]).</del></li></ol></li><li><ins>If <var>then</var>.[[Type]] is <emu-const>throw return</emu-const>,<ol><li><ins>Return <emu-xref aoid="CancelPromise"><a href="#sec-cancelpromise">CancelPromise</a></emu-xref>(<var>promise</var>, <var>then</var>.[[Value]]).</ins></li></ol></ins></li><li><ins>If <var>then</var>.[[Type]] is <emu-const>throw</emu-const>,<ol><li><ins>Return <emu-xref aoid="RejectPromise"><a href="#sec-rejectpromise">RejectPromise</a></emu-xref>(<var>promise</var>, <var>then</var>.[[Value]]).</ins></li></ol></ins></li><li><ins>Assert: <var>then</var>.[[Type]] is <emu-const>normal</emu-const>.</ins></li><li>Let <var>thenAction</var> be <var>then</var>.[[Value]].</li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>thenAction</var>) is <emu-val>false</emu-val>, then<ol><li>Return <emu-xref aoid="FulfillPromise"><a href="#sec-fulfillpromise">FulfillPromise</a></emu-xref>(<var>promise</var>, <var>resolution</var>).</li></ol></li><li>Perform <emu-xref aoid="EnqueueJob"><a href="https://tc39.github.io/ecma262/#sec-enqueuejob">EnqueueJob</a></emu-xref>(<code>"PromiseJobs"</code>, <emu-xref aoid="PromiseResolveThenableJob"><a href="#sec-promiseresolvethenablejob">PromiseResolveThenableJob</a></emu-xref>, « <var>promise</var>, <var>resolution</var>, <var>thenAction</var> »).</li><li>Return <emu-val>undefined</emu-val>.
+        </li></ol></emu-alg>
+        <p>The <code>length</code> property of a promise resolve function is 1.</p>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-cancelpromise" aoid="CancelPromise">
+      <h1><span class="secnum">2.1.4</span><ins>CancelPromise ( <var>promise</var>, <var>cancelation</var> )</ins><span class="utils"><span class="anchor"><a href="#sec-cancelpromise">#</a></span></span></h1>
+      <p>When the CancelPromise abstract operation is called with arguments <var>promise</var> and <var>cancelation</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Assert: The value of <var>promise</var>.[[PromiseState]] is <code>"pending"</code>.</li><li>Let <var>reactions</var> be the value of <var>promise</var>.[[PromiseCancelReactions]].</li><li>Set the value of <var>promise</var>.[[PromiseResult]] to <var>value</var>.</li><li>Set the value of <var>promise</var>.[[PromiseFulfillReactions]] to <emu-val>undefined</emu-val>.</li><li>Set the value of <var>promise</var>.[[PromiseRejectReactions]] to <emu-val>undefined</emu-val>.</li><li>Set the value of <var>promise</var>.[[PromiseCancelReactions]] to <emu-val>undefined</emu-val>.</li><li>Set the value of <var>promise</var>.[[PromiseState]] to <code>"canceled"</code>.</li><li>Return <emu-xref aoid="TriggerPromiseReactions"><a href="#sec-triggerpromisereactions">TriggerPromiseReactions</a></emu-xref>(<var>reactions</var>, <var>cancelation</var>).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.4" -->
+    <emu-clause id="sec-fulfillpromise" aoid="FulfillPromise">
+      <h1><span class="secnum">2.1.5</span>FulfillPromise ( <var>promise</var>, <var>value</var> )<span class="utils"><span class="anchor"><a href="#sec-fulfillpromise">#</a></span></span></h1>
+      <p>When the FulfillPromise abstract operation is called with arguments <var>promise</var> and <var>value</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Assert: The value of <var>promise</var>.[[PromiseState]] is <code>"pending"</code>.</li><li>Let <var>reactions</var> be the value of <var>promise</var>.[[PromiseFulfillReactions]].</li><li>Set the value of <var>promise</var>.[[PromiseResult]] to <var>value</var>.</li><li>Set the value of <var>promise</var>.[[PromiseFulfillReactions]] to <emu-val>undefined</emu-val>.</li><li>Set the value of <var>promise</var>.[[PromiseRejectReactions]] to <emu-val>undefined</emu-val>.</li><li><ins>Set the value of <var>promise</var>.[[PromiseCancelReactions]] to <emu-val>undefined</emu-val>.</ins></li><li>Set the value of <var>promise</var>.[[PromiseState]] to <code>"fulfilled"</code>.</li><li>Return <emu-xref aoid="TriggerPromiseReactions"><a href="#sec-triggerpromisereactions">TriggerPromiseReactions</a></emu-xref>(<var>reactions</var>, <var>value</var>).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.5" -->
+    <emu-clause id="sec-newpromisecapability" aoid="NewPromiseCapability">
+      <h1><span class="secnum">2.1.6</span>NewPromiseCapability ( <var>C</var> )<span class="utils"><span class="anchor"><a href="#sec-newpromisecapability">#</a></span></span></h1>
+      <p>The abstract operation NewPromiseCapability takes a constructor function, and attempts to use that constructor function in the fashion of the built-in <code>Promise</code> constructor to create a Promise object and extract its resolve<del> and reject</del><ins>, reject, and cancel</ins> functions. The promise plus the resolve<del> and reject</del><ins>, reject, and cancel</ins> functions are used to initialize a new PromiseCapability record which is returned as the value of this abstract operation.</p>
+      <emu-alg><ol><li>If <emu-xref aoid="IsConstructor"><a href="https://tc39.github.io/ecma262/#sec-isconstructor">IsConstructor</a></emu-xref>(<var>C</var>) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>NOTE <var>C</var> is assumed to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor (see <emu-xref href="#sec-promise-executor"><a href="#sec-promise-executor">2.3.1</a></emu-xref>).</li><li>Let <var>promiseCapability</var> be a new PromiseCapability { [[Promise]]: <emu-val>undefined</emu-val>, [[Resolve]]: <emu-val>undefined</emu-val>, [[Reject]]: <emu-val>undefined</emu-val><ins>, [[Cancel]]: <emu-val>undefined</emu-val></ins> }.</li><li>Let <var>executor</var> be a new built-in function object as defined in GetCapabilitiesExecutor Functions (<emu-xref href="#sec-getcapabilitiesexecutor-functions"><a href="#sec-getcapabilitiesexecutor-functions">2.1.6.1</a></emu-xref>).</li><li>Set <var>executor</var>.[[Capability]] to <var>promiseCapability</var>.</li><li>Let <var>promise</var> be ? <emu-xref aoid="Construct"><a href="https://tc39.github.io/ecma262/#sec-construct">Construct</a></emu-xref>(<var>C</var>, « <var>executor</var> »).</li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>promiseCapability</var>.[[Resolve]]) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>promiseCapability</var>.[[Reject]]) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li><ins>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>promiseCapability</var>.[[Cancel]]) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</ins></li><li>Set <var>promiseCapability</var>.[[Promise]] to <var>promise</var>.</li><li>Return <var>promiseCapability</var>.
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>This abstract operation supports Promise subclassing, as it is generic on any constructor that calls a passed executor function argument in the same way as the Promise constructor. It is used to generalize static methods of the Promise constructor to any subclass.</p>
+      </emu-note>
+
+      <!-- es6num="25.4.1.5.1" -->
+      <emu-clause id="sec-getcapabilitiesexecutor-functions">
+        <h1><span class="secnum">2.1.6.1</span>GetCapabilitiesExecutor Functions<span class="utils"><span class="anchor"><a href="#sec-getcapabilitiesexecutor-functions">#</a></span></span></h1>
+        <p>A GetCapabilitiesExecutor function is an anonymous built-in function that has a [[Capability]] internal slot.</p>
+        <p>When a GetCapabilitiesExecutor function <var>F</var> is called with arguments <var>resolve</var><del> and <var>reject</var></del><ins>, <var>reject</var>, and <var>cancel</var></ins>, the following steps are taken:</p>
+        <emu-alg><ol><li>Assert: <var>F</var> has a [[Capability]] internal slot whose value is a PromiseCapability <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref>.</li><li>Let <var>promiseCapability</var> be the value of <var>F</var>.[[Capability]].</li><li>If <var>promiseCapability</var>.[[Resolve]] is not <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <var>promiseCapability</var>.[[Reject]] is not <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li><ins>If <var>promiseCapability</var>.[[Cancel]] is not <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</ins></li><li>Set <var>promiseCapability</var>.[[Resolve]] to <var>resolve</var>.</li><li>Set <var>promiseCapability</var>.[[Reject]] to <var>reject</var>.</li><li><ins>Set <var>promiseCapability</var>.[[Cancel]] to <var>cancel</var>.</ins></li><li>Return <emu-val>undefined</emu-val>.
+        </li></ol></emu-alg>
+        <p>The <code>length</code> property of a GetCapabilitiesExecutor function is  <del>2</del><ins>3</ins>.</p>
+      </emu-clause>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.6" -->
+    <emu-clause id="sec-ispromise" aoid="IsPromise">
+      <h1><span class="secnum">2.1.7</span>IsPromise ( <var>x</var> )<span class="utils"><span class="anchor"><a href="#sec-ispromise">#</a></span></span></h1>
+      <p>The abstract operation IsPromise checks for the promise brand on an object.</p>
+      <emu-alg><ol><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>x</var>) is not Object, return <emu-val>false</emu-val>.</li><li>If <var>x</var> does not have a [[PromiseState]] internal slot, return <emu-val>false</emu-val>.</li><li>Return <emu-val>true</emu-val>.
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.7" -->
+    <emu-clause id="sec-rejectpromise" aoid="RejectPromise">
+      <h1><span class="secnum">2.1.8</span>RejectPromise ( <var>promise</var>, <var>reason</var> )<span class="utils"><span class="anchor"><a href="#sec-rejectpromise">#</a></span></span></h1>
+      <p>When the RejectPromise abstract operation is called with arguments <var>promise</var> and <var>reason</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Assert: The value of <var>promise</var>.[[PromiseState]] is <code>"pending"</code>.</li><li>Let <var>reactions</var> be the value of <var>promise</var>.[[PromiseRejectReactions]].</li><li>Set the value of <var>promise</var>.[[PromiseResult]] to <var>reason</var>.</li><li>Set the value of <var>promise</var>.[[PromiseFulfillReactions]] to <emu-val>undefined</emu-val>.</li><li>Set the value of <var>promise</var>.[[PromiseRejectReactions]] to <emu-val>undefined</emu-val>.</li><li><ins>Set the value of <var>promise</var>.[[PromiseCancelReactions]] to <emu-val>undefined</emu-val>.</ins></li><li>Set the value of <var>promise</var>.[[PromiseState]] to <code>"rejected"</code>.</li><li>If the value of <var>promise</var>.[[PromiseIsHandled]] is <emu-val>false</emu-val>, perform <emu-xref aoid="HostPromiseRejectionTracker"><a href="#sec-host-promise-rejection-tracker">HostPromiseRejectionTracker</a></emu-xref>(<var>promise</var>, <code>"reject"</code>).</li><li>Return <emu-xref aoid="TriggerPromiseReactions"><a href="#sec-triggerpromisereactions">TriggerPromiseReactions</a></emu-xref>(<var>reactions</var>, <var>reason</var>).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.1.8" -->
+    <emu-clause id="sec-triggerpromisereactions" aoid="TriggerPromiseReactions">
+      <h1><span class="secnum">2.1.9</span>TriggerPromiseReactions ( <var>reactions</var>, <var>argument</var> )<span class="utils"><span class="anchor"><a href="#sec-triggerpromisereactions">#</a></span></span></h1>
+      <p>The abstract operation TriggerPromiseReactions takes a collection of PromiseReactionRecords and enqueues a new Job for each record. Each such Job processes the [[Type]] and [[Handler]] of the PromiseReactionRecord, and if the [[Handler]] is a function, calls it passing the given argument. If the [[Handler]] is <emu-val>undefined</emu-val>, the behavior is determined by the [[Type]].</p>
+      <emu-alg><ol><li>Repeat for each <var>reaction</var> in <var>reactions</var>, in original insertion order<ol><li>Perform <emu-xref aoid="EnqueueJob"><a href="https://tc39.github.io/ecma262/#sec-enqueuejob">EnqueueJob</a></emu-xref>(<code>"PromiseJobs"</code>, <emu-xref aoid="PromiseReactionJob"><a href="#sec-promisereactionjob">PromiseReactionJob</a></emu-xref>, « <var>reaction</var>, <var>argument</var> »).</li></ol></li><li>Return <emu-val>undefined</emu-val>.
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-host-promise-rejection-tracker" aoid="HostPromiseRejectionTracker">
+      <h1><span class="secnum">2.1.10</span>HostPromiseRejectionTracker ( <var>promise</var>, <var>operation</var> )<span class="utils"><span class="anchor"><a href="#sec-host-promise-rejection-tracker">#</a></span></span></h1>
+
+      <p>HostPromiseRejectionTracker is an implementation-defined abstract operation that allows host environments to track promise rejections.</p>
+
+      <p>An implementation of HostPromiseRejectionTracker must complete normally in all cases. The default implementation of HostPromiseRejectionTracker is to unconditionally return an empty normal completion.</p>
+
+      <emu-note><span class="note">Note 1</span>
+        <p>HostPromiseRejectionTracker is called in two scenarios:</p>
+
+        <ul>
+          <li>When a promise is rejected without any handlers, it is called with its <var>operation</var> argument set to <code>"reject"</code>.</li>
+          <li>When a handler is added to a rejected promise for the first time, it is called with its <var>operation</var> argument set to <code>"handle"</code>.</li>
+        </ul>
+
+        <p>A typical implementation of HostPromiseRejectionTracker might try to notify developers of unhandled rejections, while also being careful to notify them if such previous notifications are later invalidated by new handlers being attached.</p>
+      </emu-note>
+
+      <emu-note><span class="note">Note 2</span>
+        <p>If <var>operation</var> is <code>"handle"</code>, an implementation should not hold a reference to promise in a way that would interfere with garbage collection. An implementation may hold a reference to promise if operation is <code>"reject"</code>, since it is expected that rejections will be rare and not on hot code paths.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <!-- es6num="25.4.2" -->
+  <emu-clause id="sec-promise-jobs">
+    <h1><span class="secnum">2.2</span>Promise Jobs<span class="utils"><span class="anchor"><a href="#sec-promise-jobs">#</a></span></span></h1>
+
+    <!-- es6num="25.4.2.1" -->
+    <emu-clause id="sec-promisereactionjob" aoid="PromiseReactionJob">
+      <h1><span class="secnum">2.2.1</span>PromiseReactionJob ( <var>reaction</var>, <var>argument</var> )<span class="utils"><span class="anchor"><a href="#sec-promisereactionjob">#</a></span></span></h1>
+      <p>The job PromiseReactionJob with parameters <var>reaction</var> and <var>argument</var> applies the appropriate handler to the incoming value, and uses the handler's return value to resolve or reject the derived promise associated with that handler.</p>
+      <emu-alg><ol><li>Assert: <var>reaction</var> is a PromiseReaction <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref>.</li><li>Let <var>promiseCapability</var> be <var>reaction</var>.[[Capabilities]].</li><li>Let <var>type</var> be <var>reaction</var>.[[Type]].</li><li>Let <var>handler</var> be <var>reaction</var>.[[Handler]].</li><li>If <var>handler</var> is <emu-val>undefined</emu-val>, then<ol><li>If <var>type</var> is <code>"Fulfill"</code>, let <var>handlerResult</var> be <emu-xref aoid="NormalCompletion"><a href="https://tc39.github.io/ecma262/#sec-normalcompletion">NormalCompletion</a></emu-xref>(<var>argument</var>).</li><li><del>Otherwise, <var>type</var> is <code>"Reject"</code>. Let</del><ins>If <var>type</var> is <code>"Reject"</code>, let</ins> <var>handlerResult</var> be <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref> { [[Type]]: <emu-const>throw</emu-const>, [[Value]]: <var>argument</var>, [[Target]]: <emu-const>empty</emu-const> }.</li><li><ins>Otherwise, <var>type</var> is <code>"Cancel"</code>. Let <var>handlerResult</var> be <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref> { [[Type]]: <emu-const>throw return</emu-const>, [[Value]]: <var>argument</var>, [[Target]]: <emu-const>empty</emu-const> }.</ins></li></ol></li><li>Else, let <var>handlerResult</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>handler</var>, <emu-val>undefined</emu-val>, « <var>argument</var> »).</li><li><del>If <var>handlerResult</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then</del><ol><li><del>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>handlerResult</var>.[[Value]] »).</del></li></ol></li><li><del>Else,</del><ol><li><del>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Resolve]], <emu-val>undefined</emu-val>, « <var>handlerResult</var>.[[Value]] »).</del></li></ol></li><li><ins>If <var>handlerResult</var>.[[Type]] is <emu-const>normal</emu-const>, then</ins><ol><li><ins>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Resolve]], <emu-val>undefined</emu-val>, « <var>handlerResult</var>.[[Value]] »).</ins></li></ol></li><li><ins>If <var>handlerResult</var>.[[Type]] is <emu-const>throw</emu-const>, then</ins><ol><li><ins>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>handlerResult</var>.[[Value]] »).</ins></li></ol></li><li><ins>Otherwise, <var>handlerResult</var>.[[Type]] is <emu-const>throw return</emu-const>. Then:</ins><ol><li><ins>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Cancel]], <emu-val>undefined</emu-val>, « <var>handlerResult</var>.[[Value]] »).</ins></li></ol></li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>status</var>).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.2.2" -->
+    <emu-clause id="sec-promiseresolvethenablejob" aoid="PromiseResolveThenableJob">
+      <h1><span class="secnum">2.2.2</span>PromiseResolveThenableJob ( <var>promiseToResolve</var>, <var>thenable</var>, <var>then</var>)<span class="utils"><span class="anchor"><a href="#sec-promiseresolvethenablejob">#</a></span></span></h1>
+      <p>The job PromiseResolveThenableJob with parameters <var>promiseToResolve</var>, <var>thenable</var>, and <var>then</var> performs the following steps:</p>
+      <emu-alg><ol><li>Let <var>resolvingFunctions</var> be <emu-xref aoid="CreateResolvingFunctions"><a href="#sec-createresolvingfunctions">CreateResolvingFunctions</a></emu-xref>(<var>promiseToResolve</var>).</li><li>Let <var>thenCallResult</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>then</var>, <var>thenable</var>, « <var>resolvingFunctions</var>.[[Resolve]], <var>resolvingFunctions</var>.[[Reject]]<ins>, <var>resolvingFunctions</var>.[[Cancel]]</ins> »).</li><li><del>If <var>thenCallResult</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then</del></li><li><ins>If <var>thenCallResult</var>.[[Type]] is <emu-const>throw</emu-const>, then</ins><ol><li>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>resolvingFunctions</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>thenCallResult</var>.[[Value]] »).</li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>status</var>).</li></ol></li><li><ins>If <var>thenCallResult</var>.[[Type]] is <emu-const>throw return</emu-const>, then</ins><ol><li><ins>Let <var>status</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>resolvingFunctions</var>.[[Cancel]], <emu-val>undefined</emu-val>, « <var>thenCallResult</var>.[[Value]] »).</ins></li><li><ins>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>status</var>).</ins></li></ol></li><li><ins>Assert: <var>thenCallResult</var>.[[Type]] is <emu-const>normal</emu-const>.</ins></li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>thenCallResult</var>).
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>This Job uses the supplied thenable and its <code>then</code> method to resolve the given promise. This process must take place as a Job to ensure that the evaluation of the <code>then</code> method occurs after evaluation of any surrounding code has completed.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <!-- es6num="25.4.3" -->
+  <emu-clause id="sec-promise-constructor">
+    <h1><span class="secnum">2.3</span>The Promise Constructor<span class="utils"><span class="anchor"><a href="#sec-promise-constructor">#</a></span></span></h1>
+    <p>The Promise constructor is the  <dfn>%Promise%</dfn> intrinsic object and the initial value of the <code>Promise</code> property of the <emu-xref href="#global-object"><a href="https://tc39.github.io/ecma262/#global-object">global object</a></emu-xref>. When called as a constructor it creates and initializes a new Promise object. <code>Promise</code> is not intended to be called as a function and will throw an exception when called in that manner.</p>
+    <p>The <code>Promise</code> constructor is designed to be subclassable. It may be used as the value in an <code>extends</code> clause of a class definition. Subclass constructors that intend to inherit the specified <code>Promise</code> behaviour must include a <code>super</code> call to the <code>Promise</code> constructor to create and initialize the subclass instance with the internal state necessary to support the <code>Promise</code> and <code>Promise.prototype</code> built-in methods.</p>
+
+    <!-- es6num="25.4.3.1" -->
+    <emu-clause id="sec-promise-executor">
+      <h1><span class="secnum">2.3.1</span>Promise ( <var>executor</var> )<span class="utils"><span class="anchor"><a href="#sec-promise-executor">#</a></span></span></h1>
+      <p>When the <code>Promise</code> function is called with argument <var>executor</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>If NewTarget is <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>executor</var>) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>promise</var> be ? <emu-xref aoid="OrdinaryCreateFromConstructor"><a href="https://tc39.github.io/ecma262/#sec-ordinarycreatefromconstructor">OrdinaryCreateFromConstructor</a></emu-xref>(NewTarget, <code>"%PromisePrototype%"</code>, « [[PromiseState]], [[PromiseResult]], [[PromiseFulfillReactions]], [[PromiseRejectReactions]], [[PromiseCancelReactions]], [[PromiseIsHandled]] »).</li><li>Set <var>promise</var>.[[PromiseState]] to <code>"pending"</code>.</li><li>Set <var>promise</var>.[[PromiseFulfillReactions]] to a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>Set <var>promise</var>.[[PromiseRejectReactions]] to a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li><ins>Set <var>promise</var>.[[PromiseCancelReactions]] to a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</ins></li><li>Set <var>promise</var>.[[PromiseIsHandled]] to <emu-val>false</emu-val>.</li><li>Let <var>resolvingFunctions</var> be <emu-xref aoid="CreateResolvingFunctions"><a href="#sec-createresolvingfunctions">CreateResolvingFunctions</a></emu-xref>(<var>promise</var>).</li><li>Let <var>completion</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>executor</var>, <emu-val>undefined</emu-val>, « <var>resolvingFunctions</var>.[[Resolve]], <var>resolvingFunctions</var>.[[Reject]], <ins>_resolvingFunctions.[[Cancel]]</ins> »).</li><li><del>If <var>completion</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then</del></li><li><ins>If <var>completion</var>.[[Type]] is <emu-const>throw</emu-const>, then</ins><ol><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>resolvingFunctions</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>completion</var>.[[Value]] »).</li></ol></li><li><ins>If <var>completion</var>.[[Type]] is <emu-const>throw return</emu-const>, then</ins><ol><li><ins>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>resolvingFunctions</var>.[[Cancel]], <emu-val>undefined</emu-val>, « <var>completion</var>.[[Value]] »).</ins></li></ol></li><li>Return <var>promise</var>.
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>The <var>executor</var> argument must be a function object. It is called for initiating and reporting completion of the possibly deferred action represented by this Promise object. The executor is called with  <del>two</del><ins>three</ins> arguments: <var>resolve</var><del> and <var>reject</var></del><ins>, <var>reject</var>, and <var>cancel</var></ins>. These are functions that may be used by the <var>executor</var> function to report eventual completion<del> or failure</del><ins>, failure, or cancelation</ins> of the deferred computation. Returning from the executor function does not mean that the deferred action has been completed but only that the request to eventually perform the deferred action has been accepted.</p>
+        <p>The <var>resolve</var> function that is passed to an <var>executor</var> function accepts a single argument. The <var>executor</var> code may eventually call the <var>resolve</var> function to indicate that it wishes to resolve the associated Promise object. The argument passed to the <var>resolve</var> function represents the eventual value of the deferred action and can be either the actual fulfillment value or another Promise object which will provide the value if it is fulfilled.</p>
+        <p>The <var>reject</var> function that is passed to an <var>executor</var> function accepts a single argument. The <var>executor</var> code may eventually call the <var>reject</var> function to indicate that the associated Promise is rejected and will never be fulfilled. The argument passed to the <var>reject</var> function is used as the rejection value of the promise. Typically it will be an <code>Error</code> object.</p>
+        <p><ins>The <var>cancel</var> function that is passed to an <var>executor</var> function accepts a single argument. The <var>executor</var> code may eventually call the <var>cancel</var> function to indicate that the associated Promise is canceled and will never be fulfilled or rejected. The argument passed to the <var>cancel</var> function is used as the cancelation of the promise.</ins></p>
+        <p>The  <del>resolve and reject</del><ins><var>resolve</var>, <var>reject</var>, and <var>cancel</var></ins> functions passed to an <var>executor</var> function by the Promise constructor have the capability to actually resolve<del> and reject</del><ins>, reject, and cancel</ins> the associated promise. Subclasses may have different constructor behaviour that passes in customized values for  <del>resolve and reject</del><ins><var>resolve</var>, <var>reject</var>, and <var>cancel</var></ins>.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <!-- es6num="25.4.4" -->
+  <emu-clause id="sec-properties-of-the-promise-constructor">
+    <h1><span class="secnum">2.4</span>Properties of the Promise Constructor<span class="utils"><span class="anchor"><a href="#sec-properties-of-the-promise-constructor">#</a></span></span></h1>
+    <p>The value of the [[Prototype]] internal slot of the <code>Promise</code> constructor is the intrinsic object <emu-xref href="#sec-properties-of-the-function-constructor"><a href="https://tc39.github.io/ecma262/#sec-properties-of-the-function-constructor">%FunctionPrototype%</a></emu-xref>.</p>
+    <p>The Promise constructor has the following properties:</p>
+
+    <!-- es6num="25.4.4.1" -->
+    <emu-clause id="sec-promise.all">
+      <h1><span class="secnum">2.4.1</span>Promise.all ( <var>iterable</var> )<span class="utils"><span class="anchor"><a href="#sec-promise.all">#</a></span></span></h1>
+      <p><ins>TODO update for cancelation</ins></p>
+      <p>The <code>all</code> function returns a new promise which is fulfilled with an array of fulfillment values for the passed promises, or rejects with the reason of the first passed promise that rejects. It resolves all elements of the passed iterable to promises as it runs this algorithm.</p>
+      <emu-alg><ol><li>Let <var>C</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>C</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>promiseCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Let <var>iterator</var> be <emu-xref aoid="GetIterator"><a href="https://tc39.github.io/ecma262/#sec-getiterator">GetIterator</a></emu-xref>(<var>iterable</var>).</li><li><emu-xref aoid="IfAbruptRejectPromise"><a href="#sec-ifabruptrejectpromise">IfAbruptRejectPromise</a></emu-xref>(<var>iterator</var>, <var>promiseCapability</var>).</li><li>Let <var>iteratorRecord</var> be <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {[[Iterator]]: <var>iterator</var>, [[Done]]: <emu-val>false</emu-val>}.</li><li>Let <var>result</var> be <emu-xref aoid="PerformPromiseAll"><a href="#sec-performpromiseall">PerformPromiseAll</a></emu-xref>(<var>iteratorRecord</var>, <var>C</var>, <var>promiseCapability</var>).</li><li>If <var>result</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then<ol><li>If <var>iteratorRecord</var>.[[Done]] is <emu-val>false</emu-val>, let <var>result</var> be <emu-xref aoid="IteratorClose"><a href="https://tc39.github.io/ecma262/#sec-iteratorclose">IteratorClose</a></emu-xref>(<var>iterator</var>, <var>result</var>).</li><li><emu-xref aoid="IfAbruptRejectPromise"><a href="#sec-ifabruptrejectpromise">IfAbruptRejectPromise</a></emu-xref>(<var>result</var>, <var>promiseCapability</var>).</li></ol></li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>result</var>).
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>The <code>all</code> function requires its <emu-val>this</emu-val> value to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor.</p>
+      </emu-note>
+
+      <!-- es6num="25.4.4.1.1" -->
+      <emu-clause id="sec-performpromiseall" aoid="PerformPromiseAll">
+        <h1><span class="secnum">2.4.1.1</span>Runtime Semantics: PerformPromiseAll( <var>iteratorRecord</var>, <var>constructor</var>, <var>resultCapability</var>)<span class="utils"><span class="anchor"><a href="#sec-performpromiseall">#</a></span></span></h1>
+        <p>When the PerformPromiseAll abstract operation is called with arguments <var>iteratorRecord</var>, <var>constructor</var>, and <var>resultCapability</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Assert: <var>constructor</var> is a constructor function.</li><li>Assert: <var>resultCapability</var> is a PromiseCapability record.</li><li>Let <var>values</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>Let <var>remainingElementsCount</var> be a new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Value]]: 1 }.</li><li>Let <var>index</var> be 0.</li><li>Repeat<ol><li>Let <var>next</var> be <emu-xref aoid="IteratorStep"><a href="https://tc39.github.io/ecma262/#sec-iteratorstep">IteratorStep</a></emu-xref>(<var>iteratorRecord</var>.[[Iterator]]).</li><li>If <var>next</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li><emu-xref aoid="ReturnIfAbrupt"><a href="https://tc39.github.io/ecma262/#sec-returnifabrupt">ReturnIfAbrupt</a></emu-xref>(<var>next</var>).</li><li>If <var>next</var> is <emu-val>false</emu-val>, then<ol><li>Set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li>Set <var>remainingElementsCount</var>.[[Value]] to <var>remainingElementsCount</var>.[[Value]] - 1.</li><li>If <var>remainingElementsCount</var>.[[Value]] is 0, then<ol><li>Let <var>valuesArray</var> be <emu-xref aoid="CreateArrayFromList"><a href="https://tc39.github.io/ecma262/#sec-createarrayfromlist">CreateArrayFromList</a></emu-xref>(<var>values</var>).</li><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>resultCapability</var>.[[Resolve]], <emu-val>undefined</emu-val>, « <var>valuesArray</var> »).</li></ol></li><li>Return <var>resultCapability</var>.[[Promise]].</li></ol></li><li>Let <var>nextValue</var> be <emu-xref aoid="IteratorValue"><a href="https://tc39.github.io/ecma262/#sec-iteratorvalue">IteratorValue</a></emu-xref>(<var>next</var>).</li><li>If <var>nextValue</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li><emu-xref aoid="ReturnIfAbrupt"><a href="https://tc39.github.io/ecma262/#sec-returnifabrupt">ReturnIfAbrupt</a></emu-xref>(<var>nextValue</var>).</li><li>Append <emu-val>undefined</emu-val> to <var>values</var>.</li><li>Let <var>nextPromise</var> be ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>constructor</var>, <code>"resolve"</code>, « <var>nextValue</var> »).</li><li>Let <var>resolveElement</var> be a new built-in function object as defined in Promise.all Resolve Element Functions.</li><li>Set <var>resolveElement</var>.[[AlreadyCalled]] to a new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {[[Value]]: <emu-val>false</emu-val> }.</li><li>Set <var>resolveElement</var>.[[Index]] to <var>index</var>.</li><li>Set <var>resolveElement</var>.[[Values]] to <var>values</var>.</li><li>Set <var>resolveElement</var>.[[Capabilities]] to <var>resultCapability</var>.</li><li>Set <var>resolveElement</var>.[[RemainingElements]] to <var>remainingElementsCount</var>.</li><li>Set <var>remainingElementsCount</var>.[[Value]] to <var>remainingElementsCount</var>.[[Value]] + 1.</li><li>Perform ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>nextPromise</var>, <code>"then"</code>, « <var>resolveElement</var>, <var>resultCapability</var>.[[Reject]] »).</li><li>Set <var>index</var> to <var>index</var> + 1.
+        </li></ol></li></ol></emu-alg>
+      </emu-clause>
+
+      <!-- es6num="25.4.4.1.2" -->
+      <emu-clause id="sec-promise.all-resolve-element-functions">
+        <h1><span class="secnum">2.4.1.2</span>Promise.all Resolve Element Functions<span class="utils"><span class="anchor"><a href="#sec-promise.all-resolve-element-functions">#</a></span></span></h1>
+        <p>A Promise.all resolve element function is an anonymous built-in function that is used to resolve a specific Promise.all element. Each Promise.all resolve element function has [[Index]], [[Values]], [[Capabilities]], [[RemainingElements]], and [[AlreadyCalled]] internal slots.</p>
+        <p>When a Promise.all resolve element function <var>F</var> is called with argument <var>x</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Let <var>alreadyCalled</var> be the value of <var>F</var>.[[AlreadyCalled]].</li><li>If <var>alreadyCalled</var>.[[Value]] is <emu-val>true</emu-val>, return <emu-val>undefined</emu-val>.</li><li>Set <var>alreadyCalled</var>.[[Value]] to <emu-val>true</emu-val>.</li><li>Let <var>index</var> be the value of <var>F</var>.[[Index]].</li><li>Let <var>values</var> be the value of <var>F</var>.[[Values]].</li><li>Let <var>promiseCapability</var> be the value of <var>F</var>.[[Capabilities]].</li><li>Let <var>remainingElementsCount</var> be the value of <var>F</var>.[[RemainingElements]].</li><li>Set <var>values</var>[<var>index</var>] to <var>x</var>.</li><li>Set <var>remainingElementsCount</var>.[[Value]] to <var>remainingElementsCount</var>.[[Value]] - 1.</li><li>If <var>remainingElementsCount</var>.[[Value]] is 0, then<ol><li>Let <var>valuesArray</var> be <emu-xref aoid="CreateArrayFromList"><a href="https://tc39.github.io/ecma262/#sec-createarrayfromlist">CreateArrayFromList</a></emu-xref>(<var>values</var>).</li><li>Return ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Resolve]], <emu-val>undefined</emu-val>, « <var>valuesArray</var> »).</li></ol></li><li>Return <emu-val>undefined</emu-val>.
+        </li></ol></emu-alg>
+        <p>The <code>length</code> property of a Promise.all resolve element function is 1.</p>
+      </emu-clause>
+    </emu-clause>
+
+    <!-- es6num="25.4.4.2" -->
+    <emu-clause id="sec-promise.prototype">
+      <h1><span class="secnum">2.4.2</span>Promise.prototype<span class="utils"><span class="anchor"><a href="#sec-promise.prototype">#</a></span></span></h1>
+      <p>The initial value of <code>Promise.prototype</code> is the intrinsic object <emu-xref href="#sec-properties-of-the-promise-prototype-object"><a href="#sec-properties-of-the-promise-prototype-object">%PromisePrototype%</a></emu-xref>.</p>
+      <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>false</emu-val> }.</p>
+    </emu-clause>
+
+    <!-- es6num="25.4.4.3" -->
+    <emu-clause id="sec-promise.race">
+      <h1><span class="secnum">2.4.3</span>Promise.race ( <var>iterable</var> )<span class="utils"><span class="anchor"><a href="#sec-promise.race">#</a></span></span></h1>
+      <p><ins>TODO update for cancelation</ins></p>
+      <p>The <code>race</code> function returns a new promise which is settled in the same way as the first passed promise to settle. It resolves all elements of the passed <var>iterable</var> to promises as it runs this algorithm.</p>
+      <emu-alg><ol><li>Let <var>C</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>C</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>promiseCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Let <var>iterator</var> be <emu-xref aoid="GetIterator"><a href="https://tc39.github.io/ecma262/#sec-getiterator">GetIterator</a></emu-xref>(<var>iterable</var>).</li><li><emu-xref aoid="IfAbruptRejectPromise"><a href="#sec-ifabruptrejectpromise">IfAbruptRejectPromise</a></emu-xref>(<var>iterator</var>, <var>promiseCapability</var>).</li><li>Let <var>iteratorRecord</var> be <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {[[Iterator]]: <var>iterator</var>, [[Done]]: <emu-val>false</emu-val>}.</li><li>Let <var>result</var> be <emu-xref aoid="PerformPromiseRace"><a href="#sec-performpromiserace">PerformPromiseRace</a></emu-xref>(<var>iteratorRecord</var>, <var>promiseCapability</var>, <var>C</var>).</li><li>If <var>result</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, then<ol><li>If <var>iteratorRecord</var>.[[Done]] is <emu-val>false</emu-val>, let <var>result</var> be <emu-xref aoid="IteratorClose"><a href="https://tc39.github.io/ecma262/#sec-iteratorclose">IteratorClose</a></emu-xref>(<var>iterator</var>, <var>result</var>).</li><li><emu-xref aoid="IfAbruptRejectPromise"><a href="#sec-ifabruptrejectpromise">IfAbruptRejectPromise</a></emu-xref>(<var>result</var>, <var>promiseCapability</var>).</li></ol></li><li>Return <emu-xref aoid="Completion"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">Completion</a></emu-xref>(<var>result</var>).
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note 1</span>
+        <p>If the <var>iterable</var> argument is empty or if none of the promises in <var>iterable</var> ever settle then the pending promise returned by this method will never be settled.</p>
+      </emu-note>
+      <emu-note><span class="note">Note 2</span>
+        <p>The <code>race</code> function expects its <emu-val>this</emu-val> value to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor. It also expects that its <emu-val>this</emu-val> value provides a <code>resolve</code> method.</p>
+      </emu-note>
+
+      <!-- es6num="25.4.4.3.1" -->
+      <emu-clause id="sec-performpromiserace" aoid="PerformPromiseRace">
+        <h1><span class="secnum">2.4.3.1</span>Runtime Semantics: PerformPromiseRace ( <var>iteratorRecord</var>, <var>promiseCapability</var>, <var>C</var> )<span class="utils"><span class="anchor"><a href="#sec-performpromiserace">#</a></span></span></h1>
+        <p>When the PerformPromiseRace abstract operation is called with arguments <var>iteratorRecord</var>, <var>promiseCapability</var>, and <var>C</var>, the following steps are taken:</p>
+        <emu-alg><ol><li>Repeat<ol><li>Let <var>next</var> be <emu-xref aoid="IteratorStep"><a href="https://tc39.github.io/ecma262/#sec-iteratorstep">IteratorStep</a></emu-xref>(<var>iteratorRecord</var>.[[Iterator]]).</li><li>If <var>next</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li><emu-xref aoid="ReturnIfAbrupt"><a href="https://tc39.github.io/ecma262/#sec-returnifabrupt">ReturnIfAbrupt</a></emu-xref>(<var>next</var>).</li><li>If <var>next</var> is <emu-val>false</emu-val>, then<ol><li>Set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li>Return <var>promiseCapability</var>.[[Promise]].</li></ol></li><li>Let <var>nextValue</var> be <emu-xref aoid="IteratorValue"><a href="https://tc39.github.io/ecma262/#sec-iteratorvalue">IteratorValue</a></emu-xref>(<var>next</var>).</li><li>If <var>nextValue</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, set <var>iteratorRecord</var>.[[Done]] to <emu-val>true</emu-val>.</li><li><emu-xref aoid="ReturnIfAbrupt"><a href="https://tc39.github.io/ecma262/#sec-returnifabrupt">ReturnIfAbrupt</a></emu-xref>(<var>nextValue</var>).</li><li>Let <var>nextPromise</var> be ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>C</var>, <code>"resolve"</code>, « <var>nextValue</var> »).</li><li>Perform ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>nextPromise</var>, <code>"then"</code>, « <var>promiseCapability</var>.[[Resolve]], <var>promiseCapability</var>.[[Reject]] »).
+        </li></ol></li></ol></emu-alg>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-promise.reject">
+      <h1><span class="secnum">2.4.4</span><ins>Promise.cancel ( <var>c</var> )</ins><span class="utils"><span class="anchor"><a href="#sec-promise.reject">#</a></span></span></h1>
+      <p>The <code>cancel</code> function returns a new promise canceled with the passed argument.</p>
+      <emu-alg><ol><li>Let <var>C</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>C</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>promiseCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Cancel]], <emu-val>undefined</emu-val>, « <var>r</var> »).</li><li>Return <var>promiseCapability</var>.[[Promise]].
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>The <code>cancel</code> function expects its <emu-val>this</emu-val> value to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor.</p>
+      </emu-note>
+    </emu-clause>
+
+    <!-- es6num="25.4.4.4" -->
+    <emu-clause id="sec-promise.reject">
+      <h1><span class="secnum">2.4.5</span>Promise.reject ( <var>r</var> )<span class="utils"><span class="anchor"><a href="#sec-promise.reject">#</a></span></span></h1>
+      <p>The <code>reject</code> function returns a new promise rejected with the passed argument.</p>
+      <emu-alg><ol><li>Let <var>C</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>C</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>promiseCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Reject]], <emu-val>undefined</emu-val>, « <var>r</var> »).</li><li>Return <var>promiseCapability</var>.[[Promise]].
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>The <code>reject</code> function expects its <emu-val>this</emu-val> value to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor.</p>
+      </emu-note>
+    </emu-clause>
+
+    <!-- es6num="25.4.4.5" -->
+    <emu-clause id="sec-promise.resolve">
+      <h1><span class="secnum">2.4.6</span>Promise.resolve ( <var>x</var> )<span class="utils"><span class="anchor"><a href="#sec-promise.resolve">#</a></span></span></h1>
+      <p>The <code>resolve</code> function returns either a new promise resolved with the passed argument, or the argument itself if the argument is a promise produced by this constructor.</p>
+      <emu-alg><ol><li>Let <var>C</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type"><a href="https://tc39.github.io/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>C</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <emu-xref aoid="IsPromise"><a href="#sec-ispromise">IsPromise</a></emu-xref>(<var>x</var>) is <emu-val>true</emu-val>, then<ol><li>Let <var>xConstructor</var> be ? <emu-xref aoid="Get"><a href="https://tc39.github.io/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>x</var>, <code>"constructor"</code>).</li><li>If <emu-xref aoid="SameValue"><a href="https://tc39.github.io/ecma262/#sec-samevalue">SameValue</a></emu-xref>(<var>xConstructor</var>, <var>C</var>) is <emu-val>true</emu-val>, return <var>x</var>.</li></ol></li><li>Let <var>promiseCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>promiseCapability</var>.[[Resolve]], <emu-val>undefined</emu-val>, « <var>x</var> »).</li><li>Return <var>promiseCapability</var>.[[Promise]].
+      </li></ol></emu-alg>
+      <emu-note><span class="note">Note</span>
+        <p>The <code>resolve</code> function expects its <emu-val>this</emu-val> value to be a constructor function that supports the parameter conventions of the <code>Promise</code> constructor.</p>
+      </emu-note>
+    </emu-clause>
+
+    <!-- es6num="25.4.4.6" -->
+    <emu-clause id="sec-get-promise-@@species">
+      <h1><span class="secnum">2.4.7</span>get Promise [ @@species ]<span class="utils"><span class="anchor"><a href="#sec-get-promise-@@species">#</a></span></span></h1>
+      <p><code>Promise[@@species]</code> is an accessor property whose set accessor function is <emu-val>undefined</emu-val>. Its get accessor function performs the following steps:</p>
+      <emu-alg><ol><li>Return the <emu-val>this</emu-val> value.
+      </li></ol></emu-alg>
+      <p>The value of the <code>name</code> property of this function is <code>"get [Symbol.species]"</code>.</p>
+      <emu-note><span class="note">Note</span>
+        <p>Promise prototype methods normally use their <code>this</code> object's constructor to create a derived object. However, a subclass constructor may over-ride that default behaviour by redefining its @@species property.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <!-- es6num="25.4.5" -->
+  <emu-clause id="sec-properties-of-the-promise-prototype-object">
+    <h1><span class="secnum">2.5</span>Properties of the Promise Prototype Object<span class="utils"><span class="anchor"><a href="#sec-properties-of-the-promise-prototype-object">#</a></span></span></h1>
+    <p>The Promise prototype object is the intrinsic object  <dfn>%PromisePrototype%</dfn>. The value of the [[Prototype]] internal slot of the Promise prototype object is the intrinsic object <emu-xref href="#sec-properties-of-the-object-prototype-object"><a href="https://tc39.github.io/ecma262/#sec-properties-of-the-object-prototype-object">%ObjectPrototype%</a></emu-xref>. The Promise prototype object is an ordinary object. It does not have a [[PromiseState]] internal slot or any of the other internal slots of Promise instances.</p>
+
+    <!-- es6num="25.4.5.1" -->
+    <emu-clause id="sec-promise.prototype.catch">
+      <h1><span class="secnum">2.5.1</span>Promise.prototype.catch ( <var>onRejected</var> )<span class="utils"><span class="anchor"><a href="#sec-promise.prototype.catch">#</a></span></span></h1>
+      <p>When the <code>catch</code> method is called with argument <var>onRejected</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Let <var>promise</var> be the <emu-val>this</emu-val> value.</li><li>Return ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>promise</var>, <code>"then"</code>, « <emu-val>undefined</emu-val>, <var>onRejected</var> »).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-promise.prototype.catchreturn">
+      <h1><span class="secnum">2.5.2</span><ins>Promise.prototype.catchReturn ( <var>onCanceled</var> )</ins><span class="utils"><span class="anchor"><a href="#sec-promise.prototype.catchreturn">#</a></span></span></h1>
+      <p>When the <code>catchReturn</code> method is called with argument <var>onCanceled</var>, the following steps are taken:</p>
+      <emu-alg><ol><li>Let <var>promise</var> be the <emu-val>this</emu-val> value.</li><li>Return ? <emu-xref aoid="Invoke"><a href="https://tc39.github.io/ecma262/#sec-invoke">Invoke</a></emu-xref>(<var>promise</var>, <code>"then"</code>, « <emu-val>undefined</emu-val>, <emu-val>undefined</emu-val>, <var>onCanceled</var> »).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <!-- es6num="25.4.5.2" -->
+    <emu-clause id="sec-promise.prototype.constructor">
+      <h1><span class="secnum">2.5.3</span>Promise.prototype.constructor<span class="utils"><span class="anchor"><a href="#sec-promise.prototype.constructor">#</a></span></span></h1>
+      <p>The initial value of <code>Promise.prototype.constructor</code> is the intrinsic object <emu-xref href="#sec-promise-constructor"><a href="#sec-promise-constructor">%Promise%</a></emu-xref>.</p>
+    </emu-clause>
+
+    <!-- es6num="25.4.5.3" -->
+    <emu-clause id="sec-promise.prototype.then">
+      <h1><span class="secnum">2.5.4</span>Promise.prototype.then ( <var>onFulfilled</var>, <var>onRejected</var><ins>, <var>onCanceled</var></ins> )<span class="utils"><span class="anchor"><a href="#sec-promise.prototype.then">#</a></span></span></h1>
+      <p>When the <code>then</code> method is called with arguments <var>onFulfilled</var><del> and <var>onRejected</var></del><ins>, <var>onRejected</var>, and <var>onCanceled</var></ins>, the following steps are taken:</p>
+      <emu-alg><ol><li>Let <var>promise</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="IsPromise"><a href="#sec-ispromise">IsPromise</a></emu-xref>(<var>promise</var>) is <emu-val>false</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>C</var> be ? <emu-xref aoid="SpeciesConstructor"><a href="https://tc39.github.io/ecma262/#sec-speciesconstructor">SpeciesConstructor</a></emu-xref>(<var>promise</var>, <emu-xref href="#sec-promise-constructor"><a href="#sec-promise-constructor">%Promise%</a></emu-xref>).</li><li>Let <var>resultCapability</var> be ? <emu-xref aoid="NewPromiseCapability"><a href="#sec-newpromisecapability">NewPromiseCapability</a></emu-xref>(<var>C</var>).</li><li>Return <emu-xref aoid="PerformPromiseThen"><a href="#sec-performpromisethen">PerformPromiseThen</a></emu-xref>(<var>promise</var>, <var>onFulfilled</var>, <var>onRejected</var>,<ins> <var>onCanceled</var>,</ins> <var>resultCapability</var>).
+      </li></ol></emu-alg>
+
+      <!-- es6num="25.4.5.3.1" -->
+      <emu-clause id="sec-performpromisethen" aoid="PerformPromiseThen">
+        <h1><span class="secnum">2.5.4.1</span>PerformPromiseThen ( <var>promise</var>, <var>onFulfilled</var>, <var>onRejected</var>,<ins> <var>onCanceled</var>,</ins> <var>resultCapability</var> )<span class="utils"><span class="anchor"><a href="#sec-performpromisethen">#</a></span></span></h1>
+        <p>The abstract operation PerformPromiseThen performs the “then” operation on <var>promise</var> using <var>onFulfilled</var><del> and <var>onRejected</var></del><ins>, <var>onRejected</var>, and <var>onCanceled</var></ins> as its settlement actions. The result is <var>resultCapability</var>'s promise.</p>
+        <emu-alg><ol><li>Assert: <emu-xref aoid="IsPromise"><a href="#sec-ispromise">IsPromise</a></emu-xref>(<var>promise</var>) is <emu-val>true</emu-val>.</li><li>Assert: <var>resultCapability</var> is a PromiseCapability record.</li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>onFulfilled</var>) is <emu-val>false</emu-val>, then<ol><li>Let <var>onFulfilled</var> be <emu-val>undefined</emu-val>.</li></ol></li><li>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>onRejected</var>) is <emu-val>false</emu-val>, then<ol><li>Let <var>onRejected</var> be <emu-val>undefined</emu-val>.</li></ol></li><li><ins>If <emu-xref aoid="IsCallable"><a href="https://tc39.github.io/ecma262/#sec-iscallable">IsCallable</a></emu-xref>(<var>onCanceled</var>) is <emu-val>false</emu-val>, then</ins><ol><li><ins>Let <var>onCanceled</var> be <emu-val>undefined</emu-val>.</ins></li></ol></li><li>Let <var>fulfillReaction</var> be the PromiseReaction { [[Capabilities]]: <var>resultCapability</var>, [[Type]]: <code>"Fulfill"</code>, [[Handler]]: <var>onFulfilled</var> }.</li><li>Let <var>rejectReaction</var> be the PromiseReaction { [[Capabilities]]: <var>resultCapability</var>, [[Type]]: <code>"Reject"</code>, [[Handler]]: <var>onRejected</var> }.</li><li><ins>Let <var>cancelReaction</var> be the PromiseReaction { [[Capabilities]]: <var>resultCapability</var>, [[Type]]: <code>"Cancel"</code>, [[Handler]]: <var>onCanceled</var> }.</ins></li><li>If the value of <var>promise</var>.[[PromiseState]] is <code>"pending"</code>, then<ol><li>Append <var>fulfillReaction</var> as the last element of the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> that is the value of <var>promise</var>.[[PromiseFulfillReactions]].</li><li>Append <var>rejectReaction</var> as the last element of the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> that is the value of <var>promise</var>.[[PromiseRejectReactions]].</li><li><ins>Append <var>cancelReaction</var> as the last element of the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> that is the value of <var>promise</var>.[[PromiseCancelReactions]].</ins></li></ol></li><li>Else if the value of <var>promise</var>.[[PromiseState]] is <code>"fulfilled"</code>, then<ol><li>Let <var>value</var> be the value of <var>promise</var>.[[PromiseResult]].</li><li>Perform <emu-xref aoid="EnqueueJob"><a href="https://tc39.github.io/ecma262/#sec-enqueuejob">EnqueueJob</a></emu-xref>(<code>"PromiseJobs"</code>, <emu-xref aoid="PromiseReactionJob"><a href="#sec-promisereactionjob">PromiseReactionJob</a></emu-xref>, « <var>fulfillReaction</var>, <var>value</var> »).</li></ol></li><li><del>Else,</del><ol><li><del>Assert: The value of <var>promise</var>.[[PromiseState]] is <code>"rejected"</code>.</del></li></ol></li><li><ins>Else if the value of <var>promise</var>.[[PromiseState]] is <code>"rejected"</code>, then</ins><ol><li>Let <var>reason</var> be the value of <var>promise</var>.[[PromiseResult]].</li><li>If the value of <var>promise</var>.[[PromiseIsHandled]] is <emu-val>false</emu-val>, perform <emu-xref aoid="HostPromiseRejectionTracker"><a href="#sec-host-promise-rejection-tracker">HostPromiseRejectionTracker</a></emu-xref>(<var>promise</var>, <code>"handle"</code>).</li><li>Perform <emu-xref aoid="EnqueueJob"><a href="https://tc39.github.io/ecma262/#sec-enqueuejob">EnqueueJob</a></emu-xref>(<code>"PromiseJobs"</code>, <emu-xref aoid="PromiseReactionJob"><a href="#sec-promisereactionjob">PromiseReactionJob</a></emu-xref>, « <var>rejectReaction</var>, <var>reason</var> »).</li></ol></li><li><ins>Otherwise the value of <var>promise</var>.[[PromiseState]] is <code>"canceled"</code>. Then:</ins><ol><li><ins>Let <var>cancelation</var> be the value of <var>promise</var>.[[PromiseResult]].</ins></li><li><ins>Perform <emu-xref aoid="EnqueueJob"><a href="https://tc39.github.io/ecma262/#sec-enqueuejob">EnqueueJob</a></emu-xref>(<code>"PromiseJobs"</code>, <emu-xref aoid="PromiseReactionJob"><a href="#sec-promisereactionjob">PromiseReactionJob</a></emu-xref>, « <var>cancelReaction</var>, <var>cancelation</var> »).</ins></li></ol></li><li>Set <var>promise</var>.[[PromiseIsHandled]] to <emu-val>true</emu-val>.</li><li>Return <var>resultCapability</var>.[[Promise]].
+        </li></ol></emu-alg>
+      </emu-clause>
+    </emu-clause>
+
+    <!-- es6num="25.4.5.4" -->
+    <emu-clause id="sec-promise.prototype-@@tostringtag">
+      <h1><span class="secnum">2.5.5</span>Promise.prototype [ @@toStringTag ]<span class="utils"><span class="anchor"><a href="#sec-promise.prototype-@@tostringtag">#</a></span></span></h1>
+      <p>The initial value of the @@toStringTag property is the String value <code>"Promise"</code>.</p>
+      <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>true</emu-val> }.</p>
+    </emu-clause>
+  </emu-clause>
+
+  <!-- es6num="25.4.6" -->
+  <emu-clause id="sec-properties-of-promise-instances">
+    <h1><span class="secnum">2.6</span>Properties of Promise Instances<span class="utils"><span class="anchor"><a href="#sec-properties-of-promise-instances">#</a></span></span></h1>
+    <p>Promise instances are ordinary objects that inherit properties from the Promise prototype object (the intrinsic, <emu-xref href="#sec-properties-of-the-promise-prototype-object"><a href="#sec-properties-of-the-promise-prototype-object">%PromisePrototype%</a></emu-xref>). Promise instances are initially created with the internal slots described in  <emu-xref href="#table-59"><a href="#table-59">Table 4</a></emu-xref>.</p>
+    <emu-table id="table-59" caption="Internal Slots of Promise Instances"><figure><figcaption>Table 4: Internal Slots of Promise Instances</figcaption>
+      <table>
+        <tbody>
+        <tr>
+          <th>
+            Internal Slot
+          
+          </th>
+          <th>
+            Description
+          
+          </th>
+        </tr>
+        <tr>
+          <td>
+            [[PromiseState]]
+          
+          </td>
+          <td>
+            A String value that governs how a promise will react to incoming calls to its <code>then</code> method. The possible values are: <code>"pending"</code>, <code>"fulfilled"</code>,  <del>and <code>"rejected"</code></del><ins><code>"rejected"</code>, and <code>"canceled"</code></ins>.
+          
+          </td>
+        </tr>
+        <tr>
+          <td>
+            [[PromiseResult]]
+          
+          </td>
+          <td>
+            The value with which the promise has been fulfilled<del> or rejected</del><ins>, rejected, or canceled</ins>, if any. Only meaningful if [[PromiseState]] is not <code>"pending"</code>.
+          
+          </td>
+        </tr>
+        <tr>
+          <td>
+            [[PromiseFulfillReactions]]
+          
+          </td>
+          <td>
+            A <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of PromiseReaction records to be processed when/if the promise transitions from the <code>"pending"</code> state to the <code>"fulfilled"</code> state.
+          
+          </td>
+        </tr>
+        <tr>
+          <td>
+            [[PromiseRejectReactions]]
+          
+          </td>
+          <td>
+            A <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of PromiseReaction records to be processed when/if the promise transitions from the <code>"pending"</code> state to the <code>"rejected"</code> state.
+          
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ins>[[PromiseCancelReactions]]</ins>
+          </td>
+          <td>
+            <ins>A <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of PromiseReaction records to be processed when/if the promise transitions from the <code>"pending"</code> state to the <code>"canceled"</code> state.</ins>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            [[PromiseIsHandled]]
+          
+          </td>
+          <td>
+            A boolean indicating whether the promise has ever had a fulfillment<del> or rejection</del><ins>, rejection, or cancelation</ins> handler; used in unhandled rejection tracking.
+          
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </figure></emu-table>
+  </emu-clause>
 </emu-clause>
 </body>

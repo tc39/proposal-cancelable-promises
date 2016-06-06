@@ -13,10 +13,9 @@ contributors: Domenic Denicola
 <emu-intro>
   <h1>Introduction</h1>
 
-  <p>This is a work-in-progress formalization of the work in <a href="https://github.com/domenic/cancelable-promise">domenic/cancelable-promise</a> and <a href="https://github.com/zenparsing/es-cancel-token">zenparsing/es-cancel-token</a>. Much is left to do:</p>
+  <p>This is a work-in-progress formalization of the work in <a href="https://github.com/domenic/cancelable-promise">domenic/cancelable-promise</a> and <a href="https://github.com/zenparsing/es-cancel-token">zenparsing/es-cancel-token</a>. The main work left to do is:</p>
 
   <ul>
-    <li>Spec cancel tokens</li>
     <li>Spec syntax for `cancel throw` and `cancel catch`.</li>
   </ul>
 
@@ -964,6 +963,176 @@ contributors: Domenic Denicola
             A boolean indicating whether the promise has ever had a fulfillment<del> or rejection</del><ins>, rejection, or cancelation</ins> handler; used in unhandled rejection tracking.
           </td>
         </tr>
+        </tbody>
+      </table>
+    </emu-table>
+  </emu-clause>
+</emu-clause>
+
+<emu-clause id="sec-canceltoken-objects">
+  <h1><ins>CancelToken Objects</ins></h1>
+
+  <p>A cancel token is an object that allows its consumer to monitor and respond to requests for cancelation of an ongoing operation.</p>
+
+  <emu-clause id="sec-canceltoken-constructor">
+    <h1>The CancelToken Constructor</h1>
+
+    <p>The CancelToken constructor is the <dfn>%CancelToken%</dfn> intrinsic object and the initial value of the `CancelToken` property of the global object. When called as a constructor, it creates and initializes as a new CancelToken object. `CancelToken` is not intended to be called as a function and will throw an exception when called in that manner.</p>
+
+    <p>The `CancelToken` constructor is designed to be subclassable. It may be used as the value in an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `CancelToken` behaviour must include a `super` call to the `CancelToken` constructor to create and initialize the subclass instance with the internal state necessary to support the `CancelToken` and `CancelToken.prototype` built-in methods.</p>
+
+    <emu-clause id="sec-canceltoken-constructor-definition">
+      <h1>CancelToken ( _executor_ )</h1>
+
+      <p>When the `CancelToken` function is called with argument _executor_, the following steps are taken:</p>
+
+      <emu-alg>
+        1. If NewTarget is *undefined*, throw a *TypeError* exception.
+        1. If IsCallable(_executor_) is *false*, throw a *TypeError* exception.
+        1. Let _cancelToken_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%CancelTokenPrototype"`, &laquo; [[CancelTokenPromise]] &raquo;).
+        1. Let _capability_ be ! NewPromiseCapability(%Promise%).
+        1. Set _cancelToken_.[[CancelTokenPromise]] to _capability_.[[Promise]].
+        1. Perform ? Call(_executor_, *undefined*, &laquo; _capability_.[[Resolve]] &raquo;).
+        1. Return _cancelToken_.
+      </emu-alg>
+
+      <emu-note>
+        <p>The _executor_ argument must be a function object. It is called to vend the ability to send the cancelation token into a canceled state, via its single argument, _cancel_.</p>
+        <p>The _cancel_ function that is passed to an _executor_ function accepts a single argument. The _executor_ code may eventually call the _cancel_ function indicate it wishes to request cancelation. The argument passed to the _cancel_ function represents the cancelation. If it is not a "thenable" value, cancelation will be requested immediately; otherwise, cancelation will be requested once the passed thenable fulfills.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-the-canceltoken-constructor">
+    <h1>Properties of the CancelToken Constructor</h1>
+
+    <p>The value of the [[Prototype]] internal slot of the `CancelToken` constructor is the intrinsic object %CancelTokenPrototype%.</p>
+
+    <p>The CancelToken constructor has the following properties:</p>
+
+    <emu-clause id="sec-canceltoken.source">
+      <h1>CancelToken.source()</h1>
+
+      <p>The `source()` function returns an object with two properties, `token` and `cancel`, which respectively give a newly-created cancel token, and the ability to request cancelation for that token. It is a convenient alternative to the `CancelToken` constructor.</p>
+
+      <emu-alg>
+        1. Let _C_ be the *this* value.
+        1. If Type(_C_) is not Object, throw a *TypeError* exception.
+        1. Let _cancelStorage_ be a new Record { [[Value]]: *undefined* }.
+        1. Let _executor_ be a new built-in function object as defined in <emu-xref href="#sec-getcancelexecutor-functions" title></emu-xref>.
+        1. Set _executor_.[[CancelStorage]] to _cancelStorage_.
+        1. Let _cancelToken_ be ? Construct(_C_, &laquo; _executor_ &raquo;).
+        1. Let _result_ be ! ObjectCreate(%ObjectPrototype%).
+        1. Perform ! CreateDataProperty(_result_, `"token"`, _cancelToken_).
+        1. Perform ! CreateDataProperty(_result_, `"cancel"`, _cancelStorage_.[[Value]]).
+        1. Return _result_.
+      </emu-alg>
+
+      <emu-clause id="sec-getcancelexecutor-functions">
+        <h1>GetCancelExecutor Functions</h1>
+
+        <p>A GetCancelExecutor function is an anonymous built-in function that has a [[CancelStorage]] internal slot.</p>
+
+        <p>When a GetCancelExecutor function _F_ is called with arguments _cancel_, the following steps are taken:</p>
+
+        <emu-alg>
+          1. Assert: _F_ has a [[CancelStorage]] internal slot whose value is a Record containing a single field [[Value]].
+          1. Let _cancelStorage_ be _F_.[[CancelStorage]].
+          1. Set _cancelStorage_.[[Value]] to _cancel_.
+          1. Return *undefined*.
+        </emu-alg>
+
+        <p>The `length` property of a GetCancelExecutor function is 1.</p>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-canceltoken.prototype">
+      <h1>CancelToken.prototype</h1>
+
+      <p>The initial value of `CancelToken.prototype` is the intrinsic object %CancelTokenPrototype%.</p>
+
+      <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-the-canceltoken-prototype-object">
+    <h1>Properties of the CancelToken Prototype Object</h1>
+
+    <p>The CancelToken prototype object is the intrinsic object <dfn>%CancelTokenPrototype%</dfn>. The value of the [[Prototype]] internal slot of the CancelToken prototype object is the intrinsic object %ObjectPrototype%. The CancelToken prototype object is an ordinary object. It does not have a [[CancelTokenPromise]] internal slot or any of the other internal slots of CancelToken instances.</p>
+
+    <emu-clause id="sec-canceltoken.prototype.cancelifrequested">
+      <h1>CancelToken.prototype.cancelIfRequested ( )</h1>
+
+      <p>When the `cancelIfRequested` method is called, the following steps are taken:</p>
+
+      <emu-alg>
+        1. Let _T_ be the *this* value.
+        1. If Type(_T_) is not Object, throw a *TypeError* exception.
+        1. If _T_ does not have a [[CancelTokenPromise]] internal slot, throw a *TypeError* exception.
+        1. Let _P_ be _T_.[[CancelTokenPromise]].
+        1. If _P_.[[PromiseState]] is `"fulfilled"`, return Completion { [[Type]]: ~cancel throw~, [[Value]]: _P_.[[PromiseResult]], [[Target]]: ~empty~ }.
+        1. Return *undefined*.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-canceltoken.prototype.constructor">
+      <h1>CancelToken.prototype.constructor</h1>
+
+      <p>The initial value of `CancelToken.prototype.constructor` is the intrinsic object %CancelToken%.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-canceltoken.prototype.promise">
+      <h1>get CancelToken.prototype.promise</h1>
+
+      <p>`CancelToken.prototype.promise` is an accessor property whose set accessor is *undefined*. Its get accessor function performs the following steps:</p>
+
+      <emu-alg>
+        1. Let _T_ be the *this* value.
+        1. If Type(_T_) is not Object, throw a *TypeError* exception.
+        1. If _T_ does not have a [[CancelTokenPromise]] internal slot, throw a *TypeError* exception.
+        1. Return _T_.[[CancelTokenPromise]].
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-canceltoken.prototype.requested">
+      <h1>get CancelToken.prototype.requested</h1>
+
+      <p>`CancelToken.prototype.requested` is an accessor property whose set accessor is *undefined*. Its get accessor function performs the following steps:</p>
+
+      <emu-alg>
+        1. Let _T_ be the *this* value.
+        1. If Type(_T_) is not Object, throw a *TypeError* exception.
+        1. If _T_ does not have a [[CancelTokenPromise]] internal slot, throw a *TypeError* exception.
+        1. If _T_.[[CancelTokenPromise]].[[PromiseState]] is `"fulfilled"`, return *true*.
+        1. Return *false*.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-canceltoken.prototype-@@tostringtag">
+      <h1>CancelToken.prototype [ @@toStringTag ]</h1>
+      <p>The initial value of the @@toStringTag property is the String value `"CancelToken"`.</p>
+      <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-canceltoken-instances">
+    <h1>Properties of CancelToken Instances</h1>
+
+    <p>CancelToken instances are ordinary objects that inherit properties from the CancelToken prototype object (the intrinsic, %CancelTokenPrototype%). CancelToken instances are initially created with the internal slots described in <emu-xref href="#table-canceltoken-internal-slots"></emu-xref>.</p>
+
+    <emu-table id="table-canceltoken-internal-slots" caption="Internal Slots of CancelToken Instances">
+      <table>
+        <thead>
+          <tr>
+            <th>Internal Slot</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>[[CancelTokenPromise]]</td>
+            <td>A Promise object (always an instance of the intrinsic, %Promise%) which will be fulfilled when/if cancelation is requested.
+          </tr>
         </tbody>
       </table>
     </emu-table>

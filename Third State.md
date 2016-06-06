@@ -2,7 +2,7 @@
 
 This document outlines why I think it's important for cancelation to be represented as a third promise state, alongside fulfillment and rejection.
 
-It's important to note that the discussions here are independent of _how_ the promise gets canceled, whether via the "cancelable promise" approach or the "cancel token" approach. The question is more about once a promise gets canceled, how that state is represented and propagates down to any derived promises.
+It's important to note that the discussions here are independent of _how_ the promise gets canceled, whether via a "task" subclass approach (as previously contemplated) or via the "cancel token" approach (as the rest of this repository assumes). The question is more about once a promise gets canceled, how that state is represented and propagates down to any derived promises.
 
 ## Against the alternative
 
@@ -110,7 +110,7 @@ In contrast, both throw and cancelation completions need to propagate, unwinding
 
 When introducing the third state, the following modifications to promises fall out rather naturally:
 
-- A new executor argument, allowing the promise creator to move it into this third state: `new Promise((resolve, reject, cancel) => { ... })`. Like `resolve` and `reject`, this accepts an argument, the cancelation reason.
+- A new executor argument, allowing the promise creator to move it into this third state: `new Promise((resolve, reject, cancel) => { ... })`. Like `resolve` and `reject`, this accepts an argument, the cancelation.
 - A new corresponding static method, `Promise.cancel(r)`, which is essentially `new Promise((_, __, cancel) => cancel(r))`.
 - A new argument to `Promise.prototype.then`, as the low-level interface for reacting to the third state: `promise.then(onFulfilled, onRejected, onCanceled)`.
 - A new helper method, `Promise.prototype.cancelCatch`, for reacting to cancelations only: `promise.cancelCatch(r => { ... })`.
@@ -150,7 +150,7 @@ Promise.prototype.finally = function (onFinally) {
     return this.then(
         value => this.constructor.resolve(onFinally()).then(() => value),
         exception => this.constructor.resolve(onFinally()).then(() => { throw exception; }),
-        reason => this.constructor.resolve(onFinally()).then(() => { cancel throw reason; })
+        cancelation => this.constructor.resolve(onFinally()).then(() => { cancel throw cancelation; })
     );
 };
 ```

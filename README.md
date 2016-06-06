@@ -28,16 +28,16 @@ The reasoning behind this is gone through in more detail in the [Third State.md]
 
 - Promise additions:
   - `new Promise((resolve, reject, cancel) => { ... })`
-  - `Promise.cancel(reason)`
+  - `Promise.cancel(cancelation)`
   - `promise.then(onFulfilled, onRejected, onCanceled)`
-  - `promise.cancelCatch(reason => { ... })`
+  - `promise.cancelCatch(cancelation => { ... })`
 - Promise behavior changes:
   - `Promise.all` will cancel its result upon the first canceled promise in the passed iterable.
   - `Promise.race` will ignore canceled promises in the passed iterable, unless all of the promises become canceled, in which case it will return a promise canceled with an array of cancelations.
 - Language additions:
-  - `try { ... } cancel catch (reason) { ... }`
-  - `cancel throw reason`
-  - `generator.cancelThrow(reason)`
+  - `try { ... } cancel catch (cancelation) { ... }`
+  - `cancel throw cancelation`
+  - `generator.cancelThrow(cancelation)`
 
 An alternative to the third state idea is being explored in [#14](https://github.com/domenic/cancelable-promise/issues/14).
 
@@ -65,7 +65,7 @@ performCancelableOperation(token);
 The cancel token contains the following APIs, to be used by those authoring potentially-cancelable operations:
 
 - `cancelToken.requested`: a boolean that returns true after the corresponding `cancel()` has been called
-- `cancelToken.promise`: a promise that fulfills (with undefined) after the corresponding `cancel()` has been called
-- `cancelToken.cancelIfRequested(reason)`: a utility API that performs `cancle throw reason` if cancelation has been requested
+- `cancelToken.promise`: a promise that fulfills once cancelation has been requested
+- `cancelToken.cancelIfRequested()`: a utility API that performs `cancle throw` for you if cancelation has been requested
 
 The cancel tokens of this proposal are heavily inspired by [Kevin Smith's design sketch](https://github.com/zenparsing/es-cancel-token), which are in turn inspired by the [.NET task cancelation architecture](https://msdn.microsoft.com/en-us/library/dd997396.aspx).

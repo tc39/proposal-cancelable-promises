@@ -31,6 +31,8 @@ The reasoning behind this is gone through in more detail in the [Third State.md]
   - `Promise.cancel(reason)`
   - `promise.then(onFulfilled, onRejected, onCanceled)`
   - `promise.cancelCatch(reason => { ... })`
+- Promise behavior changes:
+  - `Promise.race` will ignore canceled promises, unless all of the promises become canceled, in which case it will return a promise canceled with an array of cancelations.
 - Language additions:
   - `try { ... } cancel catch (reason) { ... }`
   - `cancel throw reason`

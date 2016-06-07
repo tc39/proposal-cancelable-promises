@@ -24,7 +24,7 @@ The proposal has two main parts: how to represent cancelation, and how to initia
 
 The idea is that cancelation should be represented as a third (terminal) promise state, alongside fulfilled and rejected. A canceled operation is not "successful" (fulfilled), but it did not "fail" (rejected) either. It is not an exceptional condition for something to be canceled.
 
-The reasoning behind this is gone through in more detail in the [Third State.md][] document. The consequences are:
+The reasoning behind this is gone through in more detail in the [Third State.md](Third State.md) document. The consequences are:
 
 - Promise additions:
   - `new Promise((resolve, reject, cancel) => { ... })`
@@ -53,19 +53,4 @@ const cancelToken = new CancelToken(cancel => {
 performCancelableOperation(cancelToken);
 ```
 
-although another form is often more convenient:
-
-```js
-const { token, cancel } = CancelToken.source();
-
-cancelButton.onclick = () => cancel();
-performCancelableOperation(token);
-```
-
-The cancel token contains the following APIs, to be used by those authoring potentially-cancelable operations:
-
-- `cancelToken.requested`: a boolean that returns true after the corresponding `cancel()` has been called
-- `cancelToken.promise`: a promise that fulfills once cancelation has been requested
-- `cancelToken.cancelIfRequested()`: a utility API that performs `cancle throw` for you if cancelation has been requested
-
-The cancel tokens of this proposal are heavily inspired by [Kevin Smith's design sketch](https://github.com/zenparsing/es-cancel-token), which are in turn inspired by the [.NET task cancelation architecture](https://msdn.microsoft.com/en-us/library/dd997396.aspx).
+The cancel tokens of this proposal are heavily inspired by [Kevin Smith's design sketch](https://github.com/zenparsing/es-cancel-token), which are in turn inspired by the [.NET task cancelation architecture](https://msdn.microsoft.com/en-us/library/dd997396.aspx). They are discussed further, in much more detail, in [Cancel Tokens.md](Cancel Tokens.md).

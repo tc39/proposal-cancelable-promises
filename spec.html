@@ -1138,3 +1138,69 @@ contributors: Domenic Denicola
     </emu-table>
   </emu-clause>
 </emu-clause>
+
+<emu-clause id="sec-ecmascript-language-statements-and-declarations">
+  <h1>ECMAScript Language: Statements and Declarations</h1>
+
+  <h2>Syntax</h2>
+  <emu-grammar>
+    Statement[Yield, Return] :
+      BlockStatement[?Yield, ?Return]
+      VariableStatement[?Yield]
+      EmptyStatement
+      ExpressionStatement[?Yield]
+      IfStatement[?Yield, ?Return]
+      BreakableStatement[?Yield, ?Return]
+      ContinueStatement[?Yield]
+      BreakStatement[?Yield]
+      [+Return] ReturnStatement[?Yield]
+      WithStatement[?Yield, ?Return]
+      LabelledStatement[?Yield, ?Return]
+      ThrowStatement[?Yield]
+      <ins>CancelThrowStatement[?Yield]</ins>
+      TryStatement[?Yield, ?Return]
+      DebuggerStatement
+
+    Declaration[Yield] :
+      HoistableDeclaration[?Yield]
+      ClassDeclaration[?Yield]
+      LexicalDeclaration[In, ?Yield]
+
+    HoistableDeclaration[Yield, Default] :
+      FunctionDeclaration[?Yield, ?Default]
+      GeneratorDeclaration[?Yield, ?Default]
+
+    BreakableStatement[Yield, Return] :
+      IterationStatement[?Yield, ?Return]
+      SwitchStatement[?Yield, ?Return]
+  </emu-grammar>
+
+  <emu-clause id="sec-cancel-throw-statement">
+    <h1><ins>The `cancel throw` Statement</ins></h1>
+
+    <h2>Syntax</h2>
+    <emu-grammar>
+      CancelThrowStatement[Yield] :
+        `cancel` [no LineTerminator here] `throw` `;`
+        `cancel` [no LineTerminator here] `throw` [no LineTerminator here] Expression[In, ?Yield] `;`
+    </emu-grammar>
+
+    <!-- es6num="13.14.1" -->
+    <emu-clause id="sec-cancel-throw-statement-runtime-semantics-evaluation">
+      <h1>Runtime Semantics: Evaluation</h1>
+      <!-- are the [no LineTerminator here]s necessary? Async function spec uses them; break and throw specs do not -->
+
+      <emu-grammar>CancelThrowStatement : `cancel` [no LineTerminator here] `throw` [no LineTerminator here] Expression `;`</emu-grammar>
+      <emu-alg>
+        1. Let _exprRef_ be the result of evaluating |Expression|.
+        1. Let _exprValue_ be ? GetValue(_exprRef_).
+        1. Return Completion { [[Type]]: ~cancel throw~, [[Value]]: _exprValue_, [[Target]]: ~empty~ }.
+      </emu-alg>
+
+      <emu-grammar>CancelThrowStatement : `cancel` [no LineTerminator here] `throw` `;`</emu-grammar>
+      <emu-alg>
+        1. Return Completion { [[Type]]: ~cancel throw~, [[Value]]: *undefined*, [[Target]]: ~empty~ }.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>

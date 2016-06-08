@@ -138,26 +138,21 @@ async function mockSlowFetch(url, options) {
 
 Here we pass the `cancelToken` directly to both `delay` and `fetch`. Any cancelation requests that come in will cause the currently-executing function to cancel, and thus cause `mockSlowFetch` to return a canceled promise. There's no need to insert explicit cancelation points into `mockSlowFetch`.
 
-Let's now consider an example where this is necessary. Let's say that, for some reason, we wanted to generate a bunch of keys using the web crypto API. Let's further assume that key generation is not a cancelable process; perhaps each individual key generation is fast enough that although it needs to be done asynchronously, the overhead of signaling cancelation to the thread in which key generation is taking place is not worth implementing. What we'd like to do is allow cancelation *in between* any key generation operations. To implement that, we would write something like this:
+Let's now consider an example where this is necessary. Let's say that we have some moderately-expensive operation that does not support cancelation, for example reading from a data bus. Let's further say that we'd like to keep performing this operation, ad infinitum, until either we are canceled or until we receive a specific target value. And, let's say that we want to wait 1 second between reading from the data bus, in order to conserve bus resources. One way to write this would be
 
 ```js
-async function generateABunchOfKeys(numKeys, algo, extractable, keyUsages, cancelToken) {
-  const keys = [];
-  for (let i = 0; i < numKeys; ++i) {
-    keys.push(await window.crypto.subtle.generateKey(algo, extractable, keyUsages));
+async function pollForValue(bus, targetValue cancelToken) {
+  while (true) {
+    const answer = await bus.read();
+
+    if (answer === targetValue) {
+      return;
+    }
+
     cancelToken.cancelIfRequested();
+    await delay(1000, cancelToken);
   }
-
-  return keys;
 }
 ```
 
-(TODO: this example kind of sucks. I shouldn't be messing with subtle crypto stuff as illustrative examples. And it's better done in parallel anyway, instead of in series.)
-
-In this code, in between each key generation, `generateABunchOfKeys` checks to see if cancelation has been requested by its caller. If so, it'll stop doing any further work, and return a canceled promise: `cancelIfRequested` is equivalent to
-
-```js
-if (cancelToken.requested) {
-  cancel throw /* the cancelToken's cancelation, i.e. what cancel() was called with */;
-}
-```
+In this case, the `pollForValue` function provides a cancelation opportunity after every read from the bus, via the manually-inserted `cancelIfRequested()` point, as well as during the 1 second pause.

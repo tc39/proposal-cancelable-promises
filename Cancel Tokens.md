@@ -63,7 +63,7 @@ This latter series of calls could alternately be rewritten in an async function 
 try {
   const response = await fetch("https://example.com/lotsojson.json", { cancelToken });
   const data = await response.json({ cancelToken });
-  const text = fetch(data.otherURL, { cancelToken });
+  const text = await fetch(data.otherURL, { cancelToken });
 
   updateUI(text);
 } catch (e) {

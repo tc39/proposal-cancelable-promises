@@ -32,7 +32,7 @@ Alternately, if it is not convenient to immediately store (or use) the `cancel` 
 ```js
 const { token, cancel } = CancelToken.source();
 
-doCancelableThing(cancelToken);
+doCancelableThing(token);
 
 // ...later...
 cancel();

@@ -53,7 +53,7 @@ fetch("https://example.com/lotsojson.json", { cancelToken })
   .then(response => response.json({ cancelToken }))
   .then(data => fetch(data.otherURL, { cancelToken }))
   .then(text => updateUI(text))
-  .catch(showUIError)
+  .else(showUIError)
   .finally(stopSpinner);
 ```
 
@@ -66,7 +66,7 @@ try {
   const text = await fetch(data.otherURL, { cancelToken });
 
   updateUI(text);
-} catch (e) {
+} else (e) {
   showUIError(e);
 } finally {
   stopSpinner();
@@ -75,7 +75,7 @@ try {
 
 Note how we reuse the same cancel token for multiple sequential asynchronous operations, thus guaranteeing that if the cancel button is clicked while *any* of them is ongoing, that operation will be canceled.
 
-Note the connection to the canceled "third state". If `fetch()` and `response.json()` are implemented to return a canceled promise once cancelation is requested (as they should be), then canceling during their operation will cause the entire promise chain to pass down the canceled path, skipping any further fulfillment handlers (like `updateUI`) or rejection handlers (like `showUIError`), but causing the finally handler to run.
+Note the connection to treating cancelation as a non-error. If `fetch()` and `response.json()` are implemented to return a promise rejected with a `Cancel` instance once cancelation is requested (as they should be), then canceling during their operation will cause the entire promise chain to pass down the canceled path, skipping any further fulfillment handlers (like `updateUI`) or error-only rejection handlers (like `showUIError`), but causing the finally handler to run.
 
 ### For the consumer
 

@@ -20,26 +20,18 @@ The proposal has two main parts: how to represent cancelation, and how to initia
 
 ## Proposed solution
 
-### Representing cancelation: the "third state"
+### Representing cancelation: an exception that is not an error
 
-The idea is that cancelation should be represented as a third (terminal) promise state, alongside fulfilled and rejected. A canceled operation is not "successful" (fulfilled), but it did not "fail" (rejected) either. It is not an exceptional condition for something to be canceled.
+A canceled operation is not "successful", but it did not really "fail" either. We want cancelation to propagate in the same way as an exception, but it is not an error.
 
-The reasoning behind this is gone through in more detail in the [Third State.md](Third State.md) document. The consequences are:
+In order for this proposal to gain consensus, cancelations must be caught by `catch` blocks; we cannot treat cancelations as a new completion type which skips `catch` blocks and only triggers `finally`. However, it's important that they be distinguished objects which are in general treated differently. Top-level error handling and unhandled promise rejection tracking should ignore cancelations, and it should be syntactically easy to catch everything _but_ cancelations.
 
-- Promise additions:
-  - `new Promise((resolve, reject, cancel) => { ... })`
-  - `Promise.cancel(cancelation)`
-  - `promise.then(onFulfilled, onRejected, onCanceled)`
-  - `promise.cancelCatch(cancelation => { ... })`
-- Promise behavior changes:
-  - `Promise.all` will cancel its result upon the first canceled promise in the passed iterable.
-  - `Promise.race` will ignore canceled promises in the passed iterable, unless all of the promises become canceled, in which case it will return a promise canceled with an array of cancelations.
-- Language additions:
-  - `try { ... } cancel catch (cancelation) { ... }`
-  - `cancel throw cancelation`
-  - `generator.cancelThrow(cancelation)`
+The reasoning behind this is spelled out in more detail in the ["Not an Error"](Not an Error.md) document. This proposal concretely includes:
 
-An alternative to the third state idea is being explored in [#14](https://github.com/domenic/cancelable-promise/issues/14).
+- A new class, `Cancel`, which does not derive from `Error`.
+- Special-case handling of `Cancel` instances in both [synchronous error reporting](https://tc39.github.io/ecma262/#sec-host-report-errors) and [asynchronous rejection tracking](https://tc39.github.io/ecma262/#sec-host-promise-rejection-tracker)
+- New syntax, `try { ... } else (e) { ... }`, which ignores instances of `Cancel`.
+- A new Promise method, `promise.else(onRejected)`, which ignores instances of `Cancel`.
 
 ### Initiating cancelation: cancel tokens
 
@@ -53,4 +45,4 @@ const cancelToken = new CancelToken(cancel => {
 performCancelableOperation(cancelToken);
 ```
 
-The cancel tokens of this proposal are heavily inspired by [Kevin Smith's design sketch](https://github.com/zenparsing/es-cancel-token), which are in turn inspired by the [.NET task cancelation architecture](https://msdn.microsoft.com/en-us/library/dd997396.aspx). They are discussed further, in much more detail, in [Cancel Tokens.md](Cancel Tokens.md).
+The cancel tokens of this proposal are heavily inspired by [Kevin Smith's design sketch](https://github.com/zenparsing/es-cancel-token), which are in turn inspired by the [.NET task cancelation architecture](https://msdn.microsoft.com/en-us/library/dd997396.aspx). They are discussed further, in much more detail, in ["Cancel Tokens"](Cancel Tokens.md).

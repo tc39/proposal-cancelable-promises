@@ -16,25 +16,11 @@
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "WTFPL",
   "repository": "domenic/cancelable-promise",
-  "main": "lib/promise.js",
-  "files": [
-    "lib/"
-  ],
   "scripts": {
     "spec": "ecmarkup spec.html out/index.html",
-    "watch": "ecmarkup --watch spec.html out/index.html",
-    "test-aplus": "node test/helpers/test-aplus.js",
-    "test-non-aplus": "mocha --compilers js:test/helpers/install-syntax.js test/*.js",
-    "test": "npm run test-aplus && npm run test-non-aplus"
+    "watch": "ecmarkup --watch spec.html out/index.html"
   },
   "devDependencies": {
-    "ecmarkup": "^3.2.6",
-    "mocha": "^2.4.5",
-    "promises-aplus-tests": "^2.1.1",
-    "sweet.js": "^0.7.8",
-    "throw-catch-cancel-syntax": "^1.0.4"
-  },
-  "dependencies": {
-    "especially": "^2.0.1"
+    "ecmarkup": "^3.2.6"
   }
 }

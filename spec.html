@@ -220,6 +220,81 @@ contributors: Domenic Denicola
   </emu-clause>
 </emu-clause>
 
+<emu-clause id="sec-cancel-objects">
+  <h1><ins>Cancel Objects</ins></h1>
+
+  <p>Instances of Cancel objects are thrown as exceptions when an operations has been canceled. They do not indicate a runtime error, and are treated differently from other exceptions in several places in this specification.</p>
+
+  <emu-clause id="sec-cancel-constructor">
+    <h1>The Cancel Constructor</h1>
+
+    <p>The Cancel constructor is the <dfn>%Cancel%</dfn> intrinsic object and the initial value of the `Cancel` property of the global object. When `Cancel` is called as a function rather than as a constructor, it creates and initializes a new Cancel object. Thus the function call `Cancel(&hellip;)` is equivalent to the object creation expression `new Cancel(&hellip;)` with the same arguments.</p>
+
+    <p>The `Cancel` constructor is designed to be subclassable. It may be used as the value of an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `Cancel` behaviour must include a `super` call to the `Cancel` constructor to create and initialize subclass instances with a [[CancelBrand]] internal slot.</p>
+
+    <emu-clause id="sec-cancel-message">
+      <h1>Cancel ( _message_ )</h1>
+
+      <p>When the `Cancel` function is called with argument _message_, the following steps are taken:</p>
+
+      <emu-alg>
+        1. If NewTarget is *undefined*, let _newTarget_ be the active function object, else let _newTarget_ be NewTarget.
+        1. Let _O_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%CancelPrototype%"`, &laquo; [[CancelBrand]] &raquo;).
+        1. If _message_ is not *undefined*, then
+          1. Let _msg_ be ? ToString(_message_).
+          1. Let _msgDesc_ be the PropertyDescriptor { [[Value]]: _msg_, [[Writable]]: *true*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.
+          1. Perform ! DefinePropertyOrThrow(_O_, `"message"`, _msgDesc_).
+        1. Return _O_.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-the-cancel-constructor">
+    <h1>Properties of the Cancel Constructor</h1>
+
+    <p>The value of the [[Prototype]] internal slot of the Cancel constructor is the intrinsic object %FunctionPrototype%.</p>
+
+    <p>The Cancel constructor has the following properties:</p>
+
+    <emu-clause id="sec-cancel.prototype">
+      <h1>Cancel.prototype</h1>
+      <p>The initial value of `Cancel.prototype` is the intrinsic object %CancelPrototype%.</p>
+      <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-the-cancel-prototype-object">
+    <h1>Properties of the Cancel Prototype Object</h1>
+
+    <p>The Cancel prototype object is the intrinsic object <dfn>%CancelPrototype%</dfn>. The Cancel prototype object is an ordinary object. It is not a Cancel instance and does not have a [[CancelBrand]] internal slot.</p>
+
+    <p>The value of the [[Prototype]] internal slot of the Cancel prototype object is the intrinsic object %ObjectPrototype%.</p>
+
+    <emu-clause id="sec-cancel.prototype.constructor">
+      <h1>Cancel.prototype.constructor</h1>
+      <p>The initial value of `Cancel.prototype.constructor` is the intrinsic object %Cancel%.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-cancel.prototype.tostring">
+      <h1>Cancel.prototype.toString ( )</h1>
+      <p>The following steps are taken:</p>
+      <emu-alg>
+        1. Let _O_ be the *this* value.
+        1. If Type(_O_) is not Object, throw a *TypeError* exception.
+        1. Let _msg_ be ? Get(_O_, `"message"`).
+        1. If _msg_ is *undefined*, let _msg_ be the empty String; otherwise let _msg_ be ? ToString(_msg_).
+        1. If _msg_ is the empty String, return `"Cancel"`.
+        1. Return the result of concatenating `"Cancel: "` and _msg_.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-cancel-instances">
+    <h1>Properties of Cancel Instances</h1>
+    <p>Cancel instances are ordinary objects that inherit properties from the Cancel prototype object and have a [[CancelBrand]] internal slot whose value is *undefined*. The only use of [[CancelBrand]] is to identify Cancel instances; its actual value is not important and it does not store any data.</p>
+  </emu-clause>
+</emu-clause>
+
 <emu-clause id="sec-canceltoken-objects">
   <h1><ins>CancelToken Objects</ins></h1>
 

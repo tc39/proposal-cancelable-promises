@@ -386,17 +386,17 @@ contributors: Domenic Denicola
 
     <p>The CancelToken prototype object is the intrinsic object <dfn>%CancelTokenPrototype%</dfn>. The value of the [[Prototype]] internal slot of the CancelToken prototype object is the intrinsic object %ObjectPrototype%. The CancelToken prototype object is an ordinary object. It does not have a [[CancelTokenPromise]] internal slot or any of the other internal slots of CancelToken instances.</p>
 
-    <emu-clause id="sec-canceltoken.prototype.cancelifrequested">
-      <h1>CancelToken.prototype.cancelIfRequested ( )</h1>
+    <emu-clause id="sec-canceltoken.prototype.throwifrequested">
+      <h1>CancelToken.prototype.throwIfRequested ( )</h1>
 
-      <p>When the `cancelIfRequested` method is called, the following steps are taken:</p>
+      <p>When the `throwIfRequested` method is called, the following steps are taken:</p>
 
       <emu-alg>
         1. Let _T_ be the *this* value.
         1. If Type(_T_) is not Object, throw a *TypeError* exception.
         1. If _T_ does not have a [[CancelTokenPromise]] internal slot, throw a *TypeError* exception.
         1. Let _P_ be _T_.[[CancelTokenPromise]].
-        1. If _P_.[[PromiseState]] is `"fulfilled"`, return Completion { [[Type]]: ~cancel throw~, [[Value]]: _P_.[[PromiseResult]], [[Target]]: ~empty~ }.
+        1. If _P_.[[PromiseState]] is `"fulfilled"`, return Completion { [[Type]]: ~throw~, [[Value]]: _P_.[[PromiseResult]], [[Target]]: ~empty~ }.
         1. Return *undefined*.
       </emu-alg>
     </emu-clause>

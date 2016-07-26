@@ -39,7 +39,7 @@ Cancel tokens provide a standard way to cancel any API, especially asynchronous 
 
 ```js
 const cancelToken = new CancelToken(cancel => {
-  cancelButton.onclick = () => cancel();
+  cancelButton.onclick = () => cancel("The cancel button was clicked");
 });
 
 performCancelableOperation(cancelToken);

@@ -38,6 +38,8 @@ doCancelableThing(token);
 cancel();
 ```
 
+The `cancel()` function accepts as an argument an optional message, which will be converted to a string. This is used to construct a `Cancel` instance stored by the cancel token, which the consumer can later access (see below).
+
 #### Example
 
 A more serious example of this in action is the following, where we assume various Fetch-related APIs have been modified to accept a cancel token as an option:
@@ -82,8 +84,8 @@ Note the connection to treating cancelation as a non-error. If `fetch()` and `re
 For the one performing asynchronous work, who will accept an already-existing cancel token, there are three relevant APIs:
 
 - `cancelToken.requested`, which returns a boolean specifying whether cancelation has been requested (by the creator's associated `cancel` function)
-- `cancelToken.promise`, which allows registration for a callback when cancelation is requested
-- `cancelToken.cancelIfRequested()`, which will automatically `cancel throw` if cancelation is requested (or do nothing otherwise)
+- `cancelToken.promise`, which allows registration for a callback when cancelation is requested, fulfilled with a `Cancel` instance constructed when calling the associated `cancel`
+- `cancelToken.throwIfRequested()`, which will automatically `throw` the stored `Cancel` instance if cancelation is requested (or do nothing otherwise)
 
 Each of these has specific use cases which we illustrate below
 
@@ -127,7 +129,7 @@ function delay(ms, cancelToken) {
 
 #### Use within async functions
 
-The primary use of the `.cancelIfRequested()` API is within async functions that want to provide additional opportunities within their body for cancelation requests to interrupt their flow. First let's see an example where it is _not_ necessary:
+The primary use of the `.throwIfRequested()` API is within async functions that want to provide additional opportunities within their body for cancelation requests to interrupt their flow. First let's see an example where it is _not_ necessary:
 
 ```js
 async function mockSlowFetch(url, options) {
@@ -141,7 +143,7 @@ Here we pass the `cancelToken` directly to both `delay` and `fetch`. Any cancela
 Let's now consider an example where this is necessary. Let's say that we have some moderately-expensive operation that does not support cancelation, for example reading from a data bus. Let's further say that we'd like to keep performing this operation, ad infinitum, until either we are canceled or until we receive a specific target value. And, let's say that we want to wait 1 second between reading from the data bus, in order to conserve bus resources. One way to write this would be
 
 ```js
-async function pollForValue(bus, targetValue cancelToken) {
+async function pollForValue(bus, targetValue, cancelToken) {
   while (true) {
     const answer = await bus.read();
 
@@ -149,10 +151,10 @@ async function pollForValue(bus, targetValue cancelToken) {
       return;
     }
 
-    cancelToken.cancelIfRequested();
+    cancelToken.throwIfRequested();
     await delay(1000, cancelToken);
   }
 }
 ```
 
-In this case, the `pollForValue` function provides a cancelation opportunity after every read from the bus, via the manually-inserted `cancelIfRequested()` point, as well as during the 1 second pause.
+In this case, the `pollForValue` function provides a cancelation opportunity after every read from the bus, via the manually-inserted `throwIfRequested()` point, as well as during the 1 second pause.

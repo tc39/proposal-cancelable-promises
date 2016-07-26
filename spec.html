@@ -372,12 +372,12 @@ contributors: Domenic Denicola
 
         <p>A Canceler function is an anonymous built-in function that has a [[Promise]] internal slot.</p>
 
-        <p>When a Canceler function _F_ is called with argument _cancelation_, the following steps are taken:</p>
+        <p>When a Canceler function _F_ is called with argument _cancelMessage_, the following steps are taken:</p>
 
         <emu-alg>
           1. Assert: _F_ has a [[Promise]] internal slot whose value is an instance of the intrinsic %Promise%.
           1. Let _promise_ be _F_.[[Promise]].
-          1. If _cancelation_ is *undefined*, set _cancelation_ to ! Construct(%Cancel%, &laquo; &raquo;).
+          1. Let _cancelation_ be ? Construct(%Cancel%, &laquo; _cancelMessage_ &raquo;).
           1. Return ResolvePromise(_promise_, _cancelation_).
         </emu-alg>
       </emu-clause>

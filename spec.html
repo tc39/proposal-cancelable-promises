@@ -96,6 +96,43 @@ contributors: Domenic Denicola
       </emu-table>
     </emu-clause>
 
+    <emu-clause id="sec-promise-resolve-functions">
+      <h1>Promise Resolve Functions</h1>
+      <p>A promise resolve function is an anonymous built-in function that has [[Promise]] and [[AlreadyResolved]] internal slots.</p>
+      <p>When a promise resolve function _F_ is called with argument _resolution_, the following steps are taken:</p>
+      <emu-alg>
+        1. Assert: _F_ has a [[Promise]] internal slot whose value is an Object.
+        1. Let _promise_ be _F_.[[Promise]].
+        1. Let _alreadyResolved_ be _F_.[[AlreadyResolved]].
+        1. If _alreadyResolved_.[[Value]] is *true*, return *undefined*.
+        1. Set _alreadyResolved_.[[Value]] to *true*.
+        1. <ins>Return ResolvePromise(_promise_, _resolution_).</ins>
+        1. <del>(all previous steps have been moved to that abstract operation)</del>
+      </emu-alg>
+      <p>The `length` property of a promise resolve function is 1.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-resolvepromise" aoid="ResolvePromise">
+      <h1><ins>ResolvePromise ( _promise_, _resolution_ )</ins></h1>
+
+      <p>When the ResolvePromise abstract operation is called with arguments _promise_ and _resolution_, the following steps are taken:</p>
+
+      <emu-alg>
+        1. If SameValue(_resolution_, _promise_) is *true*, then
+          1. Let _selfResolutionError_ be a newly created *TypeError* object.
+          1. Return RejectPromise(_promise_, _selfResolutionError_).
+        1. If Type(_resolution_) is not Object, then
+          1. Return FulfillPromise(_promise_, _resolution_).
+        1. Let _then_ be Get(_resolution_, `"then"`).
+        1. If _then_ is an abrupt completion, then
+          1. Return RejectPromise(_promise_, _then_.[[Value]]).
+        1. Let _thenAction_ be _then_.[[Value]].
+        1. If IsCallable(_thenAction_) is *false*, then
+          1. Return FulfillPromise(_promise_, _resolution_).
+        1. Perform EnqueueJob(`"PromiseJobs"`, PromiseResolveThenableJob, &laquo; _promise_, _resolution_, _thenAction_ &raquo;).
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-rejectpromise" aoid="RejectPromise">
       <h1>RejectPromise ( _promise_, _reason_ )</h1>
       <p>When the RejectPromise abstract operation is called with arguments _promise_ and _reason_, the following steps are taken:</p>
@@ -316,9 +353,12 @@ contributors: Domenic Denicola
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
         1. If IsCallable(_executor_) is *false*, throw a *TypeError* exception.
         1. Let _cancelToken_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%CancelTokenPrototype"`, &laquo; [[CancelTokenPromise]] &raquo;).
-        1. Let _capability_ be ! NewPromiseCapability(%Promise%).
-        1. Set _cancelToken_.[[CancelTokenPromise]] to _capability_.[[Promise]].
-        1. Perform ? Call(_executor_, *undefined*, &laquo; _capability_.[[Resolve]] &raquo;).
+        1. Let _dummyExecutor_ be an anonymous built-in function of no arguments that does nothing besides return *undefined*.
+        1. Let _promise_ be ! Construct(%Promise%, &laquo; _executor_ &raquo;).
+        1. Set _cancelToken_.[[CancelTokenPromise]] to _promise_.
+        1. Let _cancel_ be a new built-in function object as defined in <emu-xref href="#sec-canceler-functions" title></emu-xref>.
+        1. Set _cancel_.[[Promise]] to _promise_.
+        1. Perform ? Call(_executor_, *undefined*, &laquo; _cancel_ &raquo;).
         1. Return _cancelToken_.
       </emu-alg>
 
@@ -326,6 +366,21 @@ contributors: Domenic Denicola
         <p>The _executor_ argument must be a function object. It is called to vend the ability to send the cancelation token into a canceled state, via its single argument, _cancel_.</p>
         <p>The _cancel_ function that is passed to an _executor_ function accepts a single argument. The _executor_ code may eventually call the _cancel_ function indicate it wishes to request cancelation. The argument passed to the _cancel_ function represents the cancelation. If it is not a "thenable" value, cancelation will be requested immediately; otherwise, cancelation will be requested once the passed thenable fulfills.</p>
       </emu-note>
+
+      <emu-clause id="sec-canceler-functions">
+        <h1>Canceler Functions</h1>
+
+        <p>A Canceler function is an anonymous built-in function that has a [[Promise]] internal slot.</p>
+
+        <p>When a Canceler function _F_ is called with argument _cancelation_, the following steps are taken:</p>
+
+        <emu-alg>
+          1. Assert: _F_ has a [[Promise]] internal slot whose value is an instance of the intrinsic %Promise%.
+          1. Let _promise_ be _F_.[[Promise]].
+          1. If _cancelation_ is *undefined*, set _cancelation_ to ! Construct(%Cancel%, &laquo; &raquo;).
+          1. Return ResolvePromise(_promise_, _cancelation_).
+        </emu-alg>
+      </emu-clause>
     </emu-clause>
   </emu-clause>
 

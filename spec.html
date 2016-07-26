@@ -472,86 +472,22 @@ contributors: Domenic Denicola
     <p>Spec reviewer note: inserted productions are not being highlighted in green due to <a href="https://github.com/bterlson/ecmarkup/issues/95">an Ecmarkup bug</a>, despite the source file markup them up as inserted. We apologize for the inconvenience.</p>
   </emu-note>
 
-  <h2>Syntax</h2>
-  <emu-grammar>
-    Statement[Yield, Return] :
-      BlockStatement[?Yield, ?Return]
-      VariableStatement[?Yield]
-      EmptyStatement
-      ExpressionStatement[?Yield]
-      IfStatement[?Yield, ?Return]
-      BreakableStatement[?Yield, ?Return]
-      ContinueStatement[?Yield]
-      BreakStatement[?Yield]
-      [+Return] ReturnStatement[?Yield]
-      WithStatement[?Yield, ?Return]
-      LabelledStatement[?Yield, ?Return]
-      ThrowStatement[?Yield]
-      <ins>CancelThrowStatement[?Yield]</ins>
-      TryStatement[?Yield, ?Return]
-      DebuggerStatement
-
-    Declaration[Yield] :
-      HoistableDeclaration[?Yield]
-      ClassDeclaration[?Yield]
-      LexicalDeclaration[In, ?Yield]
-
-    HoistableDeclaration[Yield, Default] :
-      FunctionDeclaration[?Yield, ?Default]
-      GeneratorDeclaration[?Yield, ?Default]
-
-    BreakableStatement[Yield, Return] :
-      IterationStatement[?Yield, ?Return]
-      SwitchStatement[?Yield, ?Return]
-  </emu-grammar>
-
-  <emu-clause id="sec-cancel-throw-statement">
-    <h1><ins>The `cancel throw` Statement</ins></h1>
-
-    <h2>Syntax</h2>
-    <emu-grammar>
-      CancelThrowStatement[Yield] :
-        `cancel` [no LineTerminator here] `throw` `;`
-        `cancel` [no LineTerminator here] `throw` [no LineTerminator here] Expression[In, ?Yield] `;`
-    </emu-grammar>
-
-    <!-- es6num="13.14.1" -->
-    <emu-clause id="sec-cancel-throw-statement-runtime-semantics-evaluation">
-      <h1>Runtime Semantics: Evaluation</h1>
-      <!-- are the [no LineTerminator here]s necessary? Async function spec uses them; break and throw specs do not -->
-
-      <emu-grammar>CancelThrowStatement : `cancel` [no LineTerminator here] `throw` [no LineTerminator here] Expression `;`</emu-grammar>
-      <emu-alg>
-        1. Let _exprRef_ be the result of evaluating |Expression|.
-        1. Let _exprValue_ be ? GetValue(_exprRef_).
-        1. Return Completion { [[Type]]: ~cancel throw~, [[Value]]: _exprValue_, [[Target]]: ~empty~ }.
-      </emu-alg>
-
-      <emu-grammar>CancelThrowStatement : `cancel` [no LineTerminator here] `throw` `;`</emu-grammar>
-      <emu-alg>
-        1. Return Completion { [[Type]]: ~cancel throw~, [[Value]]: *undefined*, [[Target]]: ~empty~ }.
-      </emu-alg>
-    </emu-clause>
-  </emu-clause>
-
   <emu-clause id="sec-try-statement">
     <h1>The `try` Statement</h1>
     <h2>Syntax</h2>
     <emu-grammar>
       TryStatement[Yield, Return] :
         `try` Block[?Yield, ?Return] Catch[?Yield, ?Return]
-        <ins>`try` Block[?Yield, ?Return] CancelCatch[?Yield, ?Return]</ins>
+        <ins>`try` Block[?Yield, ?Return] Else[?Yield, ?Return]</ins>
         `try` Block[?Yield, ?Return] Finally[?Yield, ?Return]
         `try` Block[?Yield, ?Return] Catch[?Yield, ?Return] Finally[?Yield, ?Return]
-        <ins>`try` Block[?Yield, ?Return] CancelCatch[?Yield, ?Return] Finally[?Yield, ?Return]</ins>
-        <ins>`try` Block[?Yield, ?Return] Catch[?Yield, ?Return] CancelCatch[?Yield, ?Return] Finally[?Yield, ?Return]</ins>
-        <ins>`try` Block[?Yield, ?Return] CancelCatch[?Yield, ?Return] Catch[?Yield, ?Return] Finally[?Yield, ?Return]</ins>
+        <ins>`try` Block[?Yield, ?Return] Else[?Yield, ?Return] Finally[?Yield, ?Return]</ins>
 
       Catch[Yield, Return] :
         `catch` `(` CatchParameter[?Yield] `)` Block[?Yield, ?Return]
 
-      <ins>CancelCatch[Yield, Return] :
-        `cancel` [no LineTerminator here] `catch` `(` CatchParameter[?Yield] `)` Block[?Yield, ?Return]</ins>
+      <ins>Else[Yield, Return] :
+        `else` `(` CatchParameter[?Yield] `)` Block[?Yield, ?Return]</ins>
 
       Finally[Yield, Return] :
         `finally` Block[?Yield, ?Return]
@@ -561,7 +497,7 @@ contributors: Domenic Denicola
         BindingPattern[?Yield]
     </emu-grammar>
     <emu-note>
-      <p>The `try` statement encloses a block of code in which an exceptional condition can occur, such as a runtime error or a `throw` statement. The `catch` clause provides the exception-handling code. When a `catch` clause catches an exception, its |CatchParameter| is bound to that exception. <ins>The `cancel catch` clause provides any cancelation-handling code. When a `cancel catch` clause catches a cancelation, its |CatchParameter| is bound to that cancelation.</p>
+      <p>The `try` statement encloses a block of code in which an exceptional condition can occur, such as a runtime error or a `throw` statement. The `catch` clause provides the exception-handling code. When a `catch` clause catches an exception, its |CatchParameter| is bound to that exception. <ins>The `else` clause provides error-handling code. It behaves identically to a `catch` clause, except that it does not catch cancelations (i.e. `Cancel` objects).</p>
     </emu-note>
 
     <!-- es6num="13.15.1" -->
@@ -583,7 +519,7 @@ contributors: Domenic Denicola
         <p>An alternative static semantics for this production is given in <emu-xref href="#sec-variablestatements-in-catch-blocks"></emu-xref>.</p>
       </emu-note>
 
-      <ins><emu-grammar>CancelCatch : `cancel` [no LineTerminator here] `catch` `(` CatchParameter `)` Block</emu-grammar></ins>
+      <ins><emu-grammar>Else : `else` `(` CatchParameter `)` Block</emu-grammar></ins>
       <ul>
         <li>
           <ins>It is a Syntax Error if BoundNames of |CatchParameter| contains any duplicate elements.</ins>
@@ -597,7 +533,7 @@ contributors: Domenic Denicola
       </ul>
 
       <emu-note>
-        <p><ins>The alternative static semantics for `catch` do not apply to `cancel catch`.</ins></p>
+        <p><ins>The alternative static semantics for `catch` do not apply to `else`.</ins></p>
       </emu-note>
     </emu-clause>
 
@@ -614,26 +550,11 @@ contributors: Domenic Denicola
         1. Return ContainsDuplicateLabels of |Catch| with argument _labelSet_.
       </emu-alg>
 
-      <ins><emu-grammar>TryStatement : `try` Block CancelCatch</emu-grammar></ins>
+      <ins><emu-grammar>TryStatement : `try` Block Else</emu-grammar></ins>
       <emu-alg>
         1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Block| with argument _labelSet_.</ins>
         1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
-        1. <ins>Return ContainsDuplicateLabels of |CancelCatch| with argument _labelSet_.</ins>
-      </emu-alg>
-
-      <ins>
-        <emu-grammar>
-          TryStatement :
-            `try` Block Catch CancelCatch
-            `try` Block CancelCatch Catch
-        </emu-grammar>
-      </ins>
-      <emu-alg>
-        1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Block| with argument _labelSet_.</ins>
-        1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
-        1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Catch| with argument _labelSet_.</ins>
-        1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
-        1. <ins>Return ContainsDuplicateLabels of |CancelCatch| with argument _labelSet_.</ins>
+        1. <ins>Return ContainsDuplicateLabels of |Else| with argument _labelSet_.</ins>
       </emu-alg>
 
       <emu-grammar>TryStatement : `try` Block Finally</emu-grammar>
@@ -652,19 +573,11 @@ contributors: Domenic Denicola
         1. Return ContainsDuplicateLabels of |Finally| with argument _labelSet_.
       </emu-alg>
 
-      <ins>
-        <emu-grammar>
-          TryStatement :
-            `try` Block Catch CancelCatch Finally
-            `try` Block CancelCatch Catch Finally
-        </emu-grammar>
-      </ins>
+      <emu-grammar><ins>TryStatement : `try` Block Else Finally</ins></emu-grammar>
       <emu-alg>
         1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Block| with argument _labelSet_.</ins>
         1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
-        1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Catch| with argument _labelSet_.</ins>
-        1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
-        1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |CancelCatch| with argument _labelSet_.</ins>
+        1. <ins>Let _hasDuplicates_ be ContainsDuplicateLabels of |Else| with argument _labelSet_.</ins>
         1. <ins>If _hasDuplicates_ is *true*, return *true*.</ins>
         1. <ins>Return ContainsDuplicateLabels of |Finally| with argument _labelSet_.</ins>
       </emu-alg>
@@ -672,6 +585,11 @@ contributors: Domenic Denicola
       <emu-grammar>Catch : `catch` `(` CatchParameter `)` Block</emu-grammar>
       <emu-alg>
         1. Return ContainsDuplicateLabels of |Block| with argument _labelSet_.
+      </emu-alg>
+
+      <emu-grammar><ins>Else : `else` `(` CatchParameter `)` Block</ins></emu-grammar>
+      <emu-alg>
+        1. <ins>Return ContainsDuplicateLabels of |Block| with argument _labelSet_.</ins>
       </emu-alg>
     </emu-clause>
 
@@ -708,7 +626,7 @@ contributors: Domenic Denicola
       <h1>Runtime Semantics: CatchClauseEvaluation</h1>
       <p>with parameter _thrownValue_</p>
       <emu-grammar>Catch : `catch` `(` CatchParameter `)` Block</emu-grammar>
-      <ins><emu-grammar>CancelCatch : `cancel` `catch` `(` CatchParameter `)` Block</emu-grammar></ins>
+      <emu-grammar><ins>Else : `else` `(` CatchParameter `)` Block</ins></emu-grammar>
       <emu-alg>
         1. Let _oldEnv_ be the running execution context's LexicalEnvironment.
         1. Let _catchEnv_ be NewDeclarativeEnvironment(_oldEnv_).
@@ -727,6 +645,9 @@ contributors: Domenic Denicola
       <emu-note>
         <p>No matter how control leaves the |Block| the LexicalEnvironment is always restored to its former state.</p>
       </emu-note>
+      <emu-note>
+        <p><ins>|Else| and |Catch| have the same runtime semantics for CatchClauseEvaluation. However, the runtime semantics for |Try| invoke CatchClauseEvaluation differently in each case depending on the thrown exception.</ins></p>
+      </emu-note>
     </emu-clause>
 
     <!-- es6num="13.15.8" -->
@@ -740,20 +661,10 @@ contributors: Domenic Denicola
         1. Return Completion(UpdateEmpty(_C_, *undefined*)).
       </emu-alg>
 
-      <ins><emu-grammar>TryStatement : `try` Block CancelCatch</emu-grammar>
+      <ins><emu-grammar>TryStatement : `try` Block Else</emu-grammar>
       <emu-alg>
         1. <ins>Let _B_ be the result of evaluating |Block|.</ins>
-        1. <ins>If _B_.[[Type]] is ~cancel throw~, let _C_ be CatchClauseEvaluation of |CancelCatch| with parameter _B_.[[Value]].</ins>
-        1. <ins>Else, let _C_ be _B_.</ins>
-        1. <ins>Return Completion(UpdateEmpty(_C_, *undefined*)).</ins>
-      </emu-alg>
-
-      <ins><emu-grammar>TryStatement : `try` Block Catch CancelCatch</emu-grammar>
-      <ins><emu-grammar>TryStatement : `try` Block CancelCatch Catch</emu-grammar>
-      <emu-alg>
-        1. <ins>Let _B_ be the result of evaluating |Block|.</ins>
-        1. <ins>If _B_.[[Type]] is ~throw~, let _C_ be CatchClauseEvaluation of |Catch| with parameter _B_.[[Value]].</ins>
-        1. <ins>If _B_.[[Type]] is ~cancel throw~, let _C_ be CatchClauseEvaluation of |CancelCatch| with parameter _B_.[[Value]].</ins>
+        1. <ins>If _B_.[[Type]] is ~throw~ and _B_.[[Value]] does not have a [[CancelBrand]] internal slot, let _C_ be CatchClauseEvaluation of |Else| with parameter _B_.[[Value]].</ins>
         1. <ins>Else, let _C_ be _B_.</ins>
         1. <ins>Return Completion(UpdateEmpty(_C_, *undefined*)).</ins>
       </emu-alg>
@@ -776,22 +687,10 @@ contributors: Domenic Denicola
         1. Return Completion(UpdateEmpty(_F_, *undefined*)).
       </emu-alg>
 
-      <ins><emu-grammar>TryStatement : `try` Block CancelCatch Finally</emu-grammar></ins>
+      <ins><emu-grammar>TryStatement : `try` Block Else Finally</emu-grammar></ins>
       <emu-alg>
         1. <ins>Let _B_ be the result of evaluating |Block|.</ins>
-        1. <ins>If _B_.[[Type]] is ~cancel throw~, let _C_ be CatchClauseEvaluation of |CancelCatch| with parameter _B_.[[Value]].</ins>
-        1. <ins>Else, let _C_ be _B_.</ins>
-        1. <ins>Let _F_ be the result of evaluating |Finally|.</ins>
-        1. <ins>If _F_.[[Type]] is ~normal~, let _F_ be _C_.</ins>
-        1. <ins>Return Completion(UpdateEmpty(_F_, *undefined*)).</ins>
-      </emu-alg>
-
-      <ins><emu-grammar>TryStatement : `try` Block Catch CancelCatch Finally</emu-grammar></ins>
-      <ins><emu-grammar>TryStatement : `try` Block CancelCatch Catch Finally</emu-grammar></ins>
-      <emu-alg>
-        1. <ins>Let _B_ be the result of evaluating |Block|.</ins>
-        1. <ins>If _B_.[[Type]] is ~throw~, let _C_ be CatchClauseEvaluation of |Catch| with parameter _B_.[[Value]].</ins>
-        1. <ins>If _B_.[[Type]] is ~cancel throw~, let _C_ be CatchClauseEvaluation of |CancelCatch| with parameter _B_.[[Value]].</ins>
+        1. <ins>If _B_.[[Type]] is ~throw~ and _B_.[[Value]] does not have a [[CancelBrand]] internal slot, let _C_ be CatchClauseEvaluation of |Else| with parameter _B_.[[Value]].</ins>
         1. <ins>Else, let _C_ be _B_.</ins>
         1. <ins>Let _F_ be the result of evaluating |Finally|.</ins>
         1. <ins>If _F_.[[Type]] is ~normal~, let _F_ be _C_.</ins>

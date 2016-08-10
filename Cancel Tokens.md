@@ -95,14 +95,14 @@ The primary use of the `.promise` property is in adapting old APIs which are not
 
 ```js
 function xhrAdapted(url, { cancelToken } = {}) {
-  return new Promise((resolve, reject, cancel) => {
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => resolve(xhr.responseText));
     xhr.addEventListener("error", () => reject(new Error("could not XHR")));
 
     if (!cancelToken) return;
     cancelToken.promise.then(cancelation => {
-      cancel(cancelation);
+      reject(cancelation);
       xhr.abort();
     });
   });
@@ -115,12 +115,12 @@ Another similar example is an adaptation of `setTimeout`:
 
 ```js
 function delay(ms, cancelToken) {
-  return new Promise((resolve, reject, cancel) => {
+  return new Promise((resolve, reject) => {
     const id = setTimeout(resolve, ms);
 
     if (!cancelToken) return;
     cancelToken.promise.then(cancelation => {
-      cancel(cancelation);
+      reject(cancelation);
       clearTimeout(id);
     });
   });

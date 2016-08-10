@@ -8,12 +8,12 @@ The examples of adapting old APIs in [Cancel Tokens.md](Cancel Tokens.md) seem a
 
 ```js
 Promise.cancelable = function (cancelToken, executor) {
-  return new Promise((resolve, reject, cancel) => {
-    const cancelAction = executor(resolve, reject, cancel);
+  return new Promise((resolve, reject) => {
+    const cancelAction = executor(resolve, reject);
 
     if (!cancelToken) return;
     cancelToken.promise.then(cancelation => {
-      cancel(cancelation);
+      reject(cancelation);
       cancelAction();
     });
   });

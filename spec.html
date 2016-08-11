@@ -1054,6 +1054,9 @@ contributors: Domenic Denicola
             1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
             1. <ins>If the List given by _cancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
           1. <ins>Otherwise,</ins>
+            1. <ins>Let _oldCancelToken_ be the value of _base_'s CancelToken component.</ins>
+            1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
+            1. <ins>If the List given by _oldCancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
             1. <ins>If IsCancelToken(_W_) is *false*, throw a *TypeError* exception.</ins>
             1. <ins>Set _base_'s CancelToken component to _W_.<ins>
             1. <ins>If the List given by _W_.[[ExecutionContexts]] does not contain _base_, add _base_ to it.</ins>

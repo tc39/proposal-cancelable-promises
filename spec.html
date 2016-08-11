@@ -348,7 +348,12 @@ contributors: Domenic Denicola
       <emu-alg>
         1. Let _promise_ be _cancelToken_.[[CancelTokenPromise]].
         1. Let _cancelation_ be ? Construct(%Cancel%, &laquo; _cancelMessage_ &raquo;).
-        1. Return ResolvePromise(_promise_, _cancelation_).
+        1. Perform ! ResolvePromise(_promise_, _cancelation_).
+        1. Let _executionContexts_ be _cancelToken_.[[ExecutionContexts]].
+        1. Repeat for each _executionContext_ in _executionContexts_
+          1. Let _asyncFunctionPromise_ be _executionContext_'s PromiseToCancel component.
+          1. Assert: _asyncFunctionPromise_.[[PromiseState]] is `"pending"`.
+          1. Perform ! RejectPromise(_asyncFunctionPromise_, _cancelation_).
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -528,6 +533,10 @@ contributors: Domenic Denicola
           <tr>
             <td>[[CancelTokenPromise]]</td>
             <td>A Promise object (always an instance of the intrinsic, %Promise%) which will be fulfilled when/if cancelation is requested.
+          </tr>
+          <tr>
+            <td>[[ExecutionContexts]]</td>
+            <td>A List of execution contexts that belong to async functions controlled by this CancelToken instance via the <code>await.cancelToken</code> meta-property.
           </tr>
         </tbody>
       </table>
@@ -761,6 +770,291 @@ contributors: Domenic Denicola
         1. <ins>Let _F_ be the result of evaluating |Finally|.</ins>
         1. <ins>If _F_.[[Type]] is ~normal~, let _F_ be _C_.</ins>
         1. <ins>Return Completion(UpdateEmpty(_F_, *undefined*)).</ins>
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>
+
+<emu-clause id="sec-await-canceltoken">
+  <h1><code>await.cancelToken</code> Modifications</h1>
+
+  <emu-note>
+    <p>This section describes the modifications to the <a href="https://tc39.github.io/ecmascript-asyncawait/">async functions</a> proposal, and surrounding machinery, necessary to implement the <code>await.cancelToken</code> feature. The CancelCancelToken abstract operation is also part of this process.</p>
+  </emu-note>
+
+  <emu-clause id="sec-execution-contexts">
+    <h1>Execution Contexts</h1>
+    <emu-note>
+      <p>Existing contents of the <a href="https://tc39.github.io/ecma262/#sec-execution-contexts">Execution Contexts</a> sections are unchanged. The following is to be inserted following the table "Additional State Components for Generator Execution Contexts".</p>
+
+      <p><ins>Execution contexts representing the evaluation of async functions have the additional state components listed in <emu-xref href="#table-additional-async-function-execution-context-state"></emu-xref>.</ins></p>
+
+      <emu-table id="table-additional-async-function-execution-context-state" caption="Additional State Components for Async Function Execution Contexts">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PromiseToCancel</td>
+              <td>The Promise object which should become canceled if the associated CancelToken is canceled.</td>
+            </tr>
+            <tr>
+              <td>PromiseToReturn</td>
+              <td>The Promise object which will be returned by the async function if none is being awaited.</td>
+            </tr>
+            <tr>
+              <td>CancelToken</td>
+              <td>The CancelToken object which controls the cancelation of <code>await</code> expressions, or *undefined* or *null* if there is no such CancelToken.</td>
+            </tr>
+          </tbody>
+        </table>
+      </emu-table>
+    </emu-note>
+  </emu-clause>
+
+  <emu-clause id="sec-left-hand-side-expressions">
+    <h1>Left-Hand-Side Expressions</h1>
+
+    <h2>Syntax</h2>
+    <emu-grammar>
+      MemberExpression[Yield] :
+        PrimaryExpression[?Yield]
+        MemberExpression[?Yield] `[` Expression[+In, ?Yield] `]`
+        MemberExpression[?Yield] `.` IdentifierName
+        MemberExpression[?Yield] TemplateLiteral[?Yield]
+        SuperProperty[?Yield]
+        MetaProperty
+        `new` MemberExpression[?Yield] Arguments[?Yield]
+
+      SuperProperty[Yield] :
+        `super` `[` Expression[+In, ?Yield] `]`
+        `super` `.` IdentifierName
+
+      MetaProperty :
+        NewTarget
+        <ins>AwaitCancelToken</ins>
+
+      NewTarget :
+        `new` `.` `target`
+
+      <ins>AwaitCancelToken :
+        `await` `.` `cancelToken`</ins>
+
+      NewExpression[Yield] :
+        MemberExpression[?Yield]
+        `new` NewExpression[?Yield]
+
+      CallExpression[Yield] :
+        MemberExpression[?Yield] Arguments[?Yield]
+        SuperCall[?Yield]
+        CallExpression[?Yield] Arguments[?Yield]
+        CallExpression[?Yield] `[` Expression[+In, ?Yield] `]`
+        CallExpression[?Yield] `.` IdentifierName
+        CallExpression[?Yield] TemplateLiteral[?Yield]
+
+      SuperCall[Yield] :
+        `super` Arguments[?Yield]
+
+      Arguments[Yield] :
+        `(` `)`
+        `(` ArgumentList[?Yield] `)`
+
+      ArgumentList[Yield] :
+        AssignmentExpression[+In, ?Yield]
+        `...` AssignmentExpression[+In, ?Yield]
+        ArgumentList[?Yield] `,` AssignmentExpression[+In, ?Yield]
+        ArgumentList[?Yield] `,` `...` AssignmentExpression[+In, ?Yield]
+
+      LeftHandSideExpression[Yield] :
+        NewExpression[?Yield]
+        CallExpression[?Yield]
+    </emu-grammar>
+
+    <emu-clause id="sec-meta-properties">
+      <h1>Meta Properties</h1>
+
+      <emu-clause id="sec-meta-properties-runtime-semantics-evaluation">
+        <h1>Runtime Semantics: Evaluation</h1>
+        <emu-grammar>NewTarget : `new` `.` `target`</emu-grammar>
+        <emu-alg>
+          1. Return GetNewTarget().
+        </emu-alg>
+
+        <emu-grammar><ins>AwaitCancelToken : `await` `.` `cancelToken`</ins></emu-grammar>
+        <emu-alg>
+          1. If the code matched by the syntactic production that is being evaluated is strict mode code, let _strict_ be *true*, else let _strict_ be *false*.
+          1. Return ? MakeAwaitCancelTokenReference(_strict_).
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-makeawaitcanceltokenreference" aoid="MakeAwaitCancelTokenReference">
+        <h1>Runtime Semantics: MakeAwaitCancelTokenReference(_strict_)</h1>
+
+        <p>The abstract operation MakeAwaitCancelTokenReference with argument _strict_ performs the following steps:</p>
+
+        <emu-alg>
+          1. Let _runningContext_ be the running execution context.
+          1. If _runningContext_ does not have a CancelToken component, throw a *ReferenceError* exception.
+          1. Return a value of type Reference that is an Await Cancel Token Reference whose base value component is _runningContext_, whose referenced name component is `""`, and whose strict reference flag is _strict_.
+        </emu-alg>
+      </emu-clause>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-reference-specification-type">
+    <h1>The Reference Specification Type</h1>
+    <emu-note>
+      <p>The Reference type is used to explain the behaviour of such operators as `delete`, `typeof`, the assignment operators, the `super` keyword<ins>, the `await.cancelToken` meta-property,</ins> and other language features. For example, the left-hand operand of an assignment is expected to produce a reference.</p>
+    </emu-note>
+    <p>A <dfn>Reference</dfn> is a resolved name or property binding. A Reference consists of three components, the base value component, the referenced name component, and the Boolean-valued strict reference flag. The base value component is either *undefined*, an Object, a Boolean, a String, a Symbol, a Number, an Environment Record, or an execution context. A base value component of *undefined* indicates that the Reference could not be resolved to a binding. The referenced name component is a String or Symbol value.</p>
+    <p>A <dfn id="super-reference">Super Reference</dfn> is a Reference that is used to represents a name binding that was expressed using the `super` keyword. A Super Reference has an additional thisValue component, and its base value component will never be an Environment Record.</p>
+    <p><ins>An <dfn id="await-cancel-token-reference">Await Cancel Token Reference</dfn> is a Reference that is used to represent the assignable binding expressed using the `await.cancelToken` meta-property. An Await Cancel Token Reference's base value component is always an execution context.</ins></p>
+
+    <p>The following abstract operations are used in this specification to access the components of references:</p>
+    <ul>
+      <li>
+        <dfn aoid="GetBase" id="ao-getbase">GetBase</dfn>(_V_). Returns the base value component of the reference _V_.
+      </li>
+      <li>
+        <dfn aoid="GetReferencedName" id="ao-getreferencedname">GetReferencedName</dfn>(_V_). Returns the referenced name component of the reference _V_.
+      </li>
+      <li>
+        <dfn aoid="IsStrictReference" id="ao-isstrictreference">IsStrictReference</dfn>(_V_). Returns the strict reference flag of the reference _V_.
+      </li>
+      <li>
+        <dfn aoid="HasPrimitiveBase" id="ao-hasprimitivebase">HasPrimitiveBase</dfn>(_V_). Returns *true* if Type(_V_'s base value component) is Boolean, String, Symbol, or Number.
+      </li>
+      <li>
+        <dfn aoid="IsPropertyReference" id="ao-ispropertyreference">IsPropertyReference</dfn>(_V_). Returns *true* if either the base value component of the reference _V_ is an object or HasPrimitiveBase(_V_) is *true*; otherwise returns *false*.
+      </li>
+      <li>
+        <dfn aoid="IsUnresolvableReference" id="ao-isunresolvablereference">IsUnresolvableReference</dfn>(_V_). Returns *true* if the base value component of the reference _V_ is *undefined*; otherwise returns *false*.
+      </li>
+      <li>
+        <dfn aoid="IsSuperReference" id="ao-issuperreference">IsSuperReference</dfn>(_V_). Returns *true* if the reference _V_ has a thisValue component.
+      </li>
+      <li>
+        <ins><dfn aoid="IsAwaitCancelTokenReference" id="ao-isawaitcanceltokenreference">IsAwaitCancelTokenReference</dfn>(_V_). Returns *true* if the base value component of the reference _V_ is an execution context.</ins>
+      </li>
+    </ul>
+    <p>The following abstract operations are used in this specification to operate on references:</p>
+
+    <emu-clause id="sec-getvalue" aoid="GetValue">
+      <h1>GetValue (_V_)</h1>
+      <emu-alg>
+        1. ReturnIfAbrupt(_V_).
+        1. If Type(_V_) is not Reference, return _V_.
+        1. Let _base_ be GetBase(_V_).
+        1. If IsUnresolvableReference(_V_) is *true*, throw a *ReferenceError* exception.
+        1. If IsPropertyReference(_V_) is *true*, then
+          1. If HasPrimitiveBase(_V_) is *true*, then
+            1. Assert: In this case, _base_ will never be *null* or *undefined*.
+            1. Let _base_ be ! ToObject(_base_).
+          1. Return ? _base_.[[Get]](GetReferencedName(_V_), GetThisValue(_V_)).
+        1. <ins>If IsAwaitCancelTokenReference(_V_) is *true*, then</ins>
+          1. <ins>Return the value of _base_'s CancelToken component.</ins>
+        1. Else _base_ must be an Environment Record,
+          1. Return ? _base_.GetBindingValue(GetReferencedName(_V_), IsStrictReference(_V_)) (see <emu-xref href="#sec-environment-records"></emu-xref>).
+      </emu-alg>
+      <emu-note>
+        <p>The object that may be created in step 5.a.ii is not accessible outside of the above abstract operation and the ordinary object [[Get]] internal method. An implementation might choose to avoid the actual creation of the object.</p>
+      </emu-note>
+    </emu-clause>
+
+    <emu-clause id="sec-putvalue" aoid="PutValue">
+      <h1>PutValue (_V_, _W_)</h1>
+      <emu-alg>
+        1. ReturnIfAbrupt(_V_).
+        1. ReturnIfAbrupt(_W_).
+        1. If Type(_V_) is not Reference, throw a *ReferenceError* exception.
+        1. Let _base_ be GetBase(_V_).
+        1. If IsUnresolvableReference(_V_) is *true*, then
+          1. If IsStrictReference(_V_) is *true*, then
+            1. Throw a *ReferenceError* exception.
+          1. Let _globalObj_ be GetGlobalObject().
+          1. Return ? Set(_globalObj_, GetReferencedName(_V_), _W_, *false*).
+        1. Else if IsPropertyReference(_V_) is *true*, then
+          1. If HasPrimitiveBase(_V_) is *true*, then
+            1. Assert: In this case, _base_ will never be *null* or *undefined*.
+            1. Set _base_ to ! ToObject(_base_).
+          1. Let _succeeded_ be ? _base_.[[Set]](GetReferencedName(_V_), _W_, GetThisValue(_V_)).
+          1. If _succeeded_ is *false* and IsStrictReference(_V_) is *true*, throw a *TypeError* exception.
+          1. Return.
+        1. <ins>Else if IsAwaitCancelTokenReference(_V_) is *true*, then</ins>
+          1. <ins>If _W_ is *undefined*,</ins>
+            1. <ins>Let _cancelToken_ be the value of _base_'s CancelToken component.</ins>
+            1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
+            1. <ins>If the List given by _cancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
+          1. <ins>Otherwise,</ins>
+            1. <ins>If Type(_W_) is not Object, throw a *TypeError* exception.<ins>
+            1. <ins>If _W_ does not have a [[CancelTokenPromise]] internal slot, throw a *TypeError* exception.<ins>
+            1. <ins>Set _base_'s CancelToken component to _W_.<ins>
+            1. <ins>If the List given by _W_.[[ExecutionContexts]] does not contain _base_, add _base_ to it.</ins>
+        1. Else _base_ must be an Environment Record,
+          1. Return ? _base_.SetMutableBinding(GetReferencedName(_V_), _W_, IsStrictReference(_V_)) (see <emu-xref href="#sec-environment-records"></emu-xref>).
+      </emu-alg>
+      <emu-note>
+        <p>The object that may be created in step 6.a.ii is not accessible outside of the above algorithm and the ordinary object [[Set]] internal method. An implementation might choose to avoid the actual creation of that object.</p>
+      </emu-note>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="async-functions">
+    <h1>Async Functions</h1>
+
+    <emu-clause id="abstract-ops-async-function-start">
+      <h1>AsyncFunctionStart ( _promiseCapability_, |asyncFunctionBody| )</h1>
+
+      <emu-alg>
+        1. Let _runningContext_ be the running execution context.
+        1. Let _asyncContext_ be a copy of _runningContext_.
+        1. <ins>Set the PromiseToCancel component of _asyncContext_ to _promiseCapability_.[[Promise]].</ins>
+        1. <ins>Set the PromiseToReturn component of _asyncContext_ to _promiseCapability_.[[Promise]].</ins>
+        1. <ins>Set the CancelToken component of _asyncContext_ to *undefined*.</ins>
+        1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed for that execution context the following steps will be performed:
+          1. Let _result_ be the result of evaluating _asyncFunctionBody_.
+          1. Assert: If we return here, the async function either threw an exception or performed an implicit or explicit return; all awaiting is done.
+          1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
+          1. <ins>Let _cancelToken_ be the value of the CancelToken component of _asyncContext_.</ins>
+          1. <ins>Assert: Type(_cancelToken_) is either Undefined or Object; if it is Object, then _cancelToken_ has a [[CancelTokenPromise]] internal slot.</ins>
+          1. <ins>If Type(_cancelToken_) is Object, and _asyncContext_ is a member of the List given by _cancelToken_.[[ExecutionContexts]], remove _asyncContext_ from _cancelToken_.[[ExecutionContexts]].</ins>
+          1. If _result_.[[type]] is ~normal~, then
+            1. Perform ! Call(_promiseCapability_.[[Resolve]], *undefined*, «*undefined*»).
+          1. Else if _result_.[[type]] is ~return~, then
+            1. Perform ! Call(_promiseCapability_.[[Resolve]], *undefined*, «_result_.[[value]]»).
+          1. Else,
+            1. Assert: _result_.[[type]] is ~throw~.
+            1. Perform ! Call(_promiseCapability_.[[Reject]], *undefined*, «_result_.[[value]]»).
+          1. Return.
+        1. Push _asyncContext_ onto the execution context stack; _asyncContext_ is now the running execution context.
+        1. Resume the suspended evaluation of _asyncContext_. Let _result_ be the value returned by the resumed computation.
+        1. Assert: When we return here, _asyncContext_ has already been removed from the execution context stack and _runningContext_ is the currently running execution context.
+        1. Assert: _result_ is a normal completion with a value of *undefined*. The possible sources of completion values are AsyncFunctionAwait or, if the async function doesn't await anything, the step 3.7 above.
+        1. Return.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="abstract-ops-async-function-await" aoid="AsyncFunctionAwait">
+      <h1>AsyncFunctionAwait ( _value_ )</h1>
+      <emu-alg>
+        1. Let _asyncContext_ be the running execution context.
+        1. Let _promiseCapability_ be ! NewPromiseCapability(%Promise%).
+        1. Let _resolveResult_ be ! Call(_promiseCapability_.[[Resolve]], *undefined*, « _value_ »).
+        1. Let _onFulfilled_ be a new built-in function object as defined in <a href="#async-function-definitions-awaited-fulfilled">AsyncFunction Awaited Fulfilled</a>.
+        1. Let _onRejected_ be a new built-in function object as defined in <a href="#async-function-definitions-awaited-rejected">AsyncFunction Awaited Rejected</a>.
+        1. Set _onFulfilled_ and _onRejected_'s [[AsyncContext]] internal slots to _asyncContext_.
+        1. Let _throwawayCapability_ be NewPromiseCapability(%Promise%). <!-- Kind of lame. This is the equivalent of ignoring the return value -->
+        1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to _promiseCapability_.[[Promise]].</ins>
+        1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
+        1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
+        1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed with a Completion _resumptionValue_ the following steps will be performed:
+          1. <ins>Set the value of _asyncContext_'s PromiesToCancel component to the value of its PromiseToReturn component.</ins>
+          1. Return _resumptionValue_.
+        1. Return.
       </emu-alg>
     </emu-clause>
   </emu-clause>

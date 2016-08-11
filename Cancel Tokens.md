@@ -127,7 +127,7 @@ function delay(ms, cancelToken) {
 }
 ```
 
-#### Use within async functions
+#### Basic usage within async functions
 
 The primary use of the `.throwIfRequested()` API is within async functions that want to provide additional opportunities within their body for cancelation requests to interrupt their flow. First let's see an example where it is _not_ necessary:
 
@@ -158,3 +158,53 @@ async function pollForValue(bus, targetValue, cancelToken) {
 ```
 
 In this case, the `pollForValue` function provides a cancelation opportunity after every read from the bus, via the manually-inserted `throwIfRequested()` point, as well as during the 1 second pause.
+
+#### Advanced usage within async functions: `await.cancelToken`
+
+In the above example, we manually inserted a `cancelToken.throwIfRequested()` after every call to `bus.read()`. For a function with a series of uncancelable operations, this can get quite unwieldy:
+
+```js
+async function cancelMeA(cancelToken) {
+  doSyncThing();
+  cancelToken.throwIfRequested();
+  await doAsyncUncancelableThing1();
+  cancelToken.throwIfRequested();
+  await doAsyncUncancelableThing2();
+}
+```
+
+Additionally, the above pattern allows less cancelation opportunities than it could: you have to wait for the operations `doAsyncUncancelableThing1()` or `doAsyncUncancelableThing2()` to fulfill, before a cancelation can have any effect. A pattern which is probably better in most cases is
+
+```js
+async function cancelMeB(cancelToken) {
+  doSyncThing();
+
+  await Promise.race([
+    doAsyncUncancelableThing1(),
+    cancelToken.promise.then(c => { throw c; })
+  ]);
+
+  await Promise.race([
+    doAsyncUncancelableThing2(),
+    cancelToken.promise.then(c => { throw c; })
+  ]);
+}
+```
+
+In this variation, if `cancelToken` becomes canceled at any time, the result of the `await` expression will be a promise rejected with the cancel token's `Cancel` object, and thus the async function as a whole will immediately bail out and return a canceled promise.
+
+To be concrete, if `doAsyncUncancelableThing1` takes 10 seconds, but you call `cancelToken`'s associated `cancel()` function after 5 seconds, then the promise returned by `cancelMeB()` will be canceled after 5 seconds. In contrast, under a similar scenario, `cancelMeA()`'s return value will only become canceled after 10 seconds, once the first `await` point has passed.
+
+Of course, both the interleaved and race patterns are unwieldly. There is a syntactic shortcut for the race pattern which makes this all much easier:
+
+```js
+async function cancelMeC(cancelToken) {
+  await.cancelToken = cancelToken;
+
+  doSyncThing();
+  await doAsyncUncancelableThing1();
+  await doAsyncUncancelableThing2();
+}
+```
+
+The function `cancelMeC` has equivalent behavior to `cancelMeB`, but is much easier to read and write.

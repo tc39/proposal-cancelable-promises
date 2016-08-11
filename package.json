@@ -21,6 +21,6 @@
     "watch": "ecmarkup --watch spec.html out/index.html"
   },
   "devDependencies": {
-    "ecmarkup": "^3.2.6"
+    "ecmarkup": "^3.3.1"
   }
 }

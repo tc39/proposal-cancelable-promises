@@ -127,6 +127,22 @@ function delay(ms, cancelToken) {
 }
 ```
 
+This boilerplate can be repetitive, so the spec has a helper function, `Promise.withCancelToken`, that allows you to write it more simply. Using our XHR example, it becomes
+
+```js
+function xhrAdapted(url, { cancelToken } = {}) {
+  return Promise.withCancelToken(cancelToken, (resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener("load", () => resolve(xhr.responseText));
+    xhr.addEventListener("error", () => reject(new Error("could not XHR")));
+
+    return () => xhr.abort();
+  });
+}
+```
+
+For reference, the rough equivalent of the `Promise.withCancelToken` spec is maintained [in the repository](with-cancel-token.js).
+
 #### Basic usage within async functions
 
 The primary use of the `.throwIfRequested()` API is within async functions that want to provide additional opportunities within their body for cancelation requests to interrupt their flow. First let's see an example where it is _not_ necessary:

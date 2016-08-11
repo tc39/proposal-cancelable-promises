@@ -1052,7 +1052,7 @@ contributors: Domenic Denicola
         1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
         1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed with a Completion _resumptionValue_ the following steps will be performed:
-          1. <ins>Set the value of _asyncContext_'s PromiesToCancel component to the value of its PromiseToReturn component.</ins>
+          1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to the value of its PromiseToReturn component.</ins>
           1. Return _resumptionValue_.
         1. Return.
       </emu-alg>

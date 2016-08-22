@@ -404,12 +404,6 @@ contributors: Domenic Denicola
         1. Let _promise_ be _cancelToken_.[[CancelTokenPromise]].
         1. Let _cancelation_ be ? Construct(%Cancel%, &laquo; _cancelMessage_ &raquo;).
         1. Perform ! ResolvePromise(_promise_, _cancelation_).
-        1. Let _executionContexts_ be _cancelToken_.[[ExecutionContexts]].
-        1. Repeat for each _executionContext_ in _executionContexts_
-          1. Let _asyncFunctionPromise_ be _executionContext_'s PromiseToCancel component.
-          1. If _asyncFunctionPromise_ is not *null*,
-            1. Assert: _asyncFunctionPromise_.[[PromiseState]] is `"pending"`.
-            1. Perform ! RejectPromise(_asyncFunctionPromise_, _cancelation_).
       </emu-alg>
     </emu-clause>
 
@@ -620,10 +614,6 @@ contributors: Domenic Denicola
           <tr>
             <td>[[CancelTokenPromise]]</td>
             <td>A Promise object (always an instance of the intrinsic, %Promise%) which will be fulfilled when/if cancelation is requested.
-          </tr>
-          <tr>
-            <td>[[ExecutionContexts]]</td>
-            <td>A List of execution contexts that belong to async functions controlled by this CancelToken instance via the <code>await.cancelToken</code> meta-property.
           </tr>
         </tbody>
       </table>
@@ -886,10 +876,6 @@ contributors: Domenic Denicola
           </thead>
           <tbody>
             <tr>
-              <td>PromiseToCancel</td>
-              <td>The Promise object which should become canceled if the associated CancelToken is canceled, or *undefined*.</td>
-            </tr>
-            <tr>
               <td>CancelToken</td>
               <td>The CancelToken object which controls the cancelation of <code>await</code> expressions, or *undefined* if there is no such CancelToken.</td>
             </tr>
@@ -1072,16 +1058,11 @@ contributors: Domenic Denicola
           1. Return.
         1. <ins>Else if IsAwaitCancelTokenReference(_V_) is *true*, then</ins>
           1. <ins>If _W_ is *undefined*,</ins>
-            1. <ins>Let _cancelToken_ be the value of _base_'s CancelToken component.</ins>
             1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
-            1. <ins>If the List given by _cancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
           1. <ins>Otherwise,</ins>
-            1. <ins>Let _oldCancelToken_ be the value of _base_'s CancelToken component.</ins>
             1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
-            1. <ins>If the List given by _oldCancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
             1. <ins>If ! IsCancelToken(_W_) is *false*, throw a *TypeError* exception.</ins>
             1. <ins>Set _base_'s CancelToken component to _W_.<ins>
-            1. <ins>If the List given by _W_.[[ExecutionContexts]] does not contain _base_, add _base_ to it.</ins>
         1. Else _base_ must be an Environment Record,
           1. Return ? _base_.SetMutableBinding(GetReferencedName(_V_), _W_, IsStrictReference(_V_)) (see <emu-xref href="#sec-environment-records"></emu-xref>).
       </emu-alg>
@@ -1100,15 +1081,11 @@ contributors: Domenic Denicola
       <emu-alg>
         1. Let _runningContext_ be the running execution context.
         1. Let _asyncContext_ be a copy of _runningContext_.
-        1. <ins>Set the PromiseToCancel component of _asyncContext_ to *undefined*.</ins>
         1. <ins>Set the CancelToken component of _asyncContext_ to *undefined*.</ins>
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed for that execution context the following steps will be performed:
           1. Let _result_ be the result of evaluating _asyncFunctionBody_.
           1. Assert: If we return here, the async function either threw an exception or performed an implicit or explicit return; all awaiting is done.
           1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
-          1. <ins>Let _cancelToken_ be the value of the CancelToken component of _asyncContext_.</ins>
-          1. <ins>Assert: either _cancelToken_ is *undefined*, or ! IsCancelToken(_cancelToken_) is *true*.</ins>
-          1. <ins>If ! IsCancelToken(_cancelToken_) is *true*, and _asyncContext_ is a member of the List given by _cancelToken_.[[ExecutionContexts]], remove _asyncContext_ from _cancelToken_.[[ExecutionContexts]].</ins>
           1. If _result_.[[type]] is ~normal~, then
             1. Perform ! Call(_promiseCapability_.[[Resolve]], *undefined*, « *undefined* »).
           1. Else if _result_.[[type]] is ~return~, then
@@ -1132,19 +1109,66 @@ contributors: Domenic Denicola
         1. <ins>Let _cancelToken_ be _asyncContext_'s CancelToken component.</ins>
         1. <ins>If _cancelToken_ is not *undefined*, and ! CancelTokenIsRequested(_cancelToken_) is *true*, return Completion { [[Type]]: ~throw~, [[Value]]: CancelTokenCancelation(_cancelToken_), [[Target]]: ~empty~ }.</ins>
         1. Let _promiseCapability_ be ! NewPromiseCapability(%Promise%).
-        1. Let _resolveResult_ be ! Call(_promiseCapability_.[[Resolve]], *undefined*, « _value_ »).
-        1. Let _onFulfilled_ be a new built-in function object as defined in <a href="#async-function-definitions-awaited-fulfilled">AsyncFunction Awaited Fulfilled</a>.
-        1. Let _onRejected_ be a new built-in function object as defined in <a href="#async-function-definitions-awaited-rejected">AsyncFunction Awaited Rejected</a>.
+        1. <del>Let _resolveResult_ be</del><ins>Perform</ins> ! Call(_promiseCapability_.[[Resolve]], *undefined*, « _value_ »).
+        1. Let _onFulfilled_ be a new built-in function object as defined in <emu-xref title href="#abstract-ops-awaited-fulfilled"></emu-xref>.
+        1. Let _onRejected_ be a new built-in function object as defined in <emu-xref title href="#abstract-ops-awaited-rejected"></emu-xref>.
         1. Set _onFulfilled_ and _onRejected_'s [[AsyncContext]] internal slots to _asyncContext_.
+        1. <ins>Let _alreadyResumed_ be a new Record { [[Value]]: *false* }.</ins>
+        1. <ins>Set _onFulfilled_ and _onReject_'s [[AlreadyResumed]] internal slots to _alreadyResumed_.</ins>
         1. Let _throwawayCapability_ be NewPromiseCapability(%Promise%). <!-- Kind of lame. This is the equivalent of ignoring the return value -->
-        1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to _promiseCapability_.[[Promise]].</ins>
         1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
+        1. <ins>If _cancelToken_ is not *undefined*,</ins>
+          1. <ins>Let _cancelTokenThrowawayCapability_ be ! NewPromiseCapability(%Promise%).</ins>
+          1. <ins>Perform ! PerformPromiseThen(_cancelToken_.[[CancelTokenPromise]], _onRejected_, *undefined*, _cancelTokenThrowawayCapability_).</ins>
         1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed with a Completion _resumptionValue_ the following steps will be performed:
-          1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to *undefined*.</ins>
           1. Return _resumptionValue_.
         1. Return.
       </emu-alg>
+
+      <emu-clause id="abstract-ops-awaited-fulfilled">
+        <h1>AsyncFunction Awaited Fulfilled<ins> Functions</ins></h1>
+
+        <p><del>Function _F_ is called with the parameter _value_.</del></p>
+
+        <p><ins>An AsyncFunction awaited fulfilled function is an anonymous built-in function that has [[AsyncContext]] and [[AlreadyResumed]] internal slots.</ins></p>
+        <p><ins>When an AsyncFunction awaited fulfilled function _F_ is called with argument _value_, the following steps are taken:</ins></p>
+
+        <emu-alg>
+          1. <ins>Let _alreadyResumed_ be _F_.[[AlreadyResumed]].</ins>
+          1. <ins>If _alreadyResumed_.[[Value]] is *true*, return *undefined*.</ins>
+          1. <ins>Set _alreadyResumed_.[[Value]] to *true*.</ins>
+          1. Let _asyncContext_ be <del>the value of _F_'s [[AsyncContext]] internal slot</del><ins>_F_.[[AsyncContext]]</ins>.
+          1. Let _prevContext_ be the running execution context.
+          1. Suspend _prevContext_.
+          1. Push _asyncContext_ onto the execution context stack; _asyncContext_ is now the running execution context.
+          1. Resume the suspended evaluation of _asyncContext_ using NormalCompletion(_value_) as the result of the operation that suspended it. Let _result_ be the value returned by the resumed computation.
+          1. Assert: When we reach this step, _asyncContext_ has already been removed from the execution context stack and _prevContext_ is the currently running execution context.
+          1. Return Completion(_result_).
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="abstract-ops-awaited-rejected">
+        <h1>AsyncFunction Awaited Rejected<ins> Functions</ins></h1>
+
+        <p><del>Function _F_ is called with the parameter _reason_.</del></p>
+
+        <p><ins>An AsyncFunction awaited rejected function is an anonymous built-in function that has [[AsyncContext]] and [[AlreadyResumed]] internal slots.</ins></p>
+        <p><ins>When an AsyncFunction awaited rejected function _F_ is called with argument _reason_, the following steps are taken:</ins></p>
+
+        <emu-alg>
+          1. <ins>Let _alreadyResumed_ be _F_.[[AlreadyResumed]].</ins>
+          1. <ins>If _alreadyResumed_.[[Value]] is *true*, return *undefined*.</ins>
+          1. <ins>Set _alreadyResumed_.[[Value]] to *true*.</ins>
+          1. Let _asyncContext_ be <del>the value of _F_'s [[AsyncContext]] internal slot</del><ins>_F_.[[AsyncContext]]</ins>.
+          1. Let _prevContext_ be the running execution context.
+          1. Suspend _prevContext_.
+          1. Push _asyncContext_ onto the execution context stack; _asyncContext_ is now the running execution context.
+          1. Resume the suspended evaluation of _asyncContext_ using Completion{[[type]]: ~throw~, [[value]]: _reason_, [[target]]: ~empty~} as the result of the operation that suspended it. Let _result_ be the value returned by the resumed computation.
+          1. Assert: When we reach this step, _asyncContext_ has already been removed from the execution context stack and _prevContext_ is the currently running execution context.
+          1. Return Completion(_result_).
+        </emu-alg>
+      </emu-clause>
     </emu-clause>
   </emu-clause>
 

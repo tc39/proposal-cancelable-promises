@@ -211,7 +211,7 @@ contributors: Domenic Denicola
 
       <emu-alg>
         1. Let _C_ be the *this* value.
-        1. If _cancelToken_ is not *undefined* and IsCancelToken(_cancelToken_) is *false*, throw a *TypeError* exception.
+        1. If _cancelToken_ is not *undefined* and ! IsCancelToken(_cancelToken_) is *false*, throw a *TypeError* exception.
         1. If IsCallable(_executor_) is *false*, throw a *TypeError* exception.
         1. Let _promiseCapability_ be ? NewPromiseCapability(_C_).
         1. Let _completion_ be Call(_executor_, *undefined*, &laquo; _promiseCapability_.[[Resolve]], _promiseCapability_.[[Reject]] &raquo;).
@@ -413,6 +413,30 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-is-cancel-token-requested" aoid="CancelTokenCancelation">
+      <h1>CancelTokenCancelation ( _cancelToken_ )</h1>
+
+      <p>The abstract operation CancelTokenCancelation returns the cancel token's cancelation.</p>
+
+      <emu-alg>
+        1. Assert: ! IsCancelToken(_cancelToken_) is *true*.
+        1. Assert: ! CancelTokenIsRequested(_cancelToken_) is *true*.
+        1. Return _cancelToken_.[[CancelTokenPromise]].[[PromiseResult]].
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-cancel-token-is-requested" aoid="CancelTokenIsRequested">
+      <h1>CancelTokenIsRequested ( _cancelToken_ )</h1>
+
+      <p>The abstract operation CancelTokenIsRequested returns *true* if cancelation has been requested for the given cancel token, or *false* otherwise.</p>
+
+      <emu-alg>
+        1. Assert: ! IsCancelToken(_cancelToken_) is *true*.
+        1. If _cancelToken_.[[CancelTokenPromise]].[[PromiseState]] is `"fulfilled"`, return *true*.
+        1. Return *false*.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-is-cancel-token" aoid="IsCancelToken">
       <h1>IsCancelToken ( _x_ )</h1>
 
@@ -536,9 +560,8 @@ contributors: Domenic Denicola
 
       <emu-alg>
         1. Let _T_ be the *this* value.
-        1. If IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
-        1. Let _P_ be _T_.[[CancelTokenPromise]].
-        1. If _P_.[[PromiseState]] is `"fulfilled"`, return Completion { [[Type]]: ~throw~, [[Value]]: _P_.[[PromiseResult]], [[Target]]: ~empty~ }.
+        1. If ! IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
+        1. If ! CancelTokenIsRequested(_T_) is *true*, return Completion { [[Type]]: ~throw~, [[Value]]: CancelTokenCancelation(_T_), [[Target]]: ~empty~ }.
         1. Return *undefined*.
       </emu-alg>
     </emu-clause>
@@ -556,7 +579,7 @@ contributors: Domenic Denicola
 
       <emu-alg>
         1. Let _T_ be the *this* value.
-        1. If IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
+        1. If ! IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
         1. Return _T_.[[CancelTokenPromise]].
       </emu-alg>
     </emu-clause>
@@ -568,9 +591,8 @@ contributors: Domenic Denicola
 
       <emu-alg>
         1. Let _T_ be the *this* value.
-        1. If IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
-        1. If _T_.[[CancelTokenPromise]].[[PromiseState]] is `"fulfilled"`, return *true*.
-        1. Return *false*.
+        1. If ! IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
+        1. Return ! CancelTokenIsRequested(_T_).
       </emu-alg>
     </emu-clause>
 
@@ -1054,7 +1076,7 @@ contributors: Domenic Denicola
             1. <ins>Let _oldCancelToken_ be the value of _base_'s CancelToken component.</ins>
             1. <ins>Set the value of _base_'s CancelToken component to *undefined*.<ins>
             1. <ins>If the List given by _oldCancelToken_.[[ExecutionContexts]] contains _base_, remove _base_ from it.</ins>
-            1. <ins>If IsCancelToken(_W_) is *false*, throw a *TypeError* exception.</ins>
+            1. <ins>If ! IsCancelToken(_W_) is *false*, throw a *TypeError* exception.</ins>
             1. <ins>Set _base_'s CancelToken component to _W_.<ins>
             1. <ins>If the List given by _W_.[[ExecutionContexts]] does not contain _base_, add _base_ to it.</ins>
         1. Else _base_ must be an Environment Record,
@@ -1082,8 +1104,8 @@ contributors: Domenic Denicola
           1. Assert: If we return here, the async function either threw an exception or performed an implicit or explicit return; all awaiting is done.
           1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
           1. <ins>Let _cancelToken_ be the value of the CancelToken component of _asyncContext_.</ins>
-          1. <ins>Assert: either _cancelToken_ is *undefined*, or IsCancelToken(_cancelToken_) is *true*.</ins>
-          1. <ins>If IsCancelToken(_cancelToken_) is *true*, and _asyncContext_ is a member of the List given by _cancelToken_.[[ExecutionContexts]], remove _asyncContext_ from _cancelToken_.[[ExecutionContexts]].</ins>
+          1. <ins>Assert: either _cancelToken_ is *undefined*, or ! IsCancelToken(_cancelToken_) is *true*.</ins>
+          1. <ins>If ! IsCancelToken(_cancelToken_) is *true*, and _asyncContext_ is a member of the List given by _cancelToken_.[[ExecutionContexts]], remove _asyncContext_ from _cancelToken_.[[ExecutionContexts]].</ins>
           1. If _result_.[[type]] is ~normal~, then
             1. Perform ! Call(_promiseCapability_.[[Resolve]], *undefined*, «*undefined*»).
           1. Else if _result_.[[type]] is ~return~, then

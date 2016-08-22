@@ -1115,11 +1115,11 @@ contributors: Domenic Denicola
         1. Set _onFulfilled_ and _onRejected_'s [[AsyncContext]] internal slots to _asyncContext_.
         1. <ins>Let _alreadyResumed_ be a new Record { [[Value]]: *false* }.</ins>
         1. <ins>Set _onFulfilled_ and _onReject_'s [[AlreadyResumed]] internal slots to _alreadyResumed_.</ins>
-        1. Let _throwawayCapability_ be NewPromiseCapability(%Promise%). <!-- Kind of lame. This is the equivalent of ignoring the return value -->
-        1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
         1. <ins>If _cancelToken_ is not *undefined*,</ins>
           1. <ins>Let _cancelTokenThrowawayCapability_ be ! NewPromiseCapability(%Promise%).</ins>
           1. <ins>Perform ! PerformPromiseThen(_cancelToken_.[[CancelTokenPromise]], _onRejected_, *undefined*, _cancelTokenThrowawayCapability_).</ins>
+        1. Let _throwawayCapability_ be NewPromiseCapability(%Promise%). <!-- Kind of lame. This is the equivalent of ignoring the return value -->
+        1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
         1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed with a Completion _resumptionValue_ the following steps will be performed:
           1. Return _resumptionValue_.

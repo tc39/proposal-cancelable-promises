@@ -917,9 +917,12 @@ contributors: Domenic Denicola
         `super` `[` Expression[+In, ?Yield] `]`
         `super` `.` IdentifierName
 
-      MetaProperty :
-        NewTarget
-        <ins>AwaitCancelToken</ins>
+      <del>MetaProperty :</del>
+        <del>NewTarget</del>
+
+      <ins>MetaProperty[Await] :</ins>
+        <ins>NewTarget</ins>
+        <ins>[+Await] AwaitCancelToken</ins>
 
       NewTarget :
         `new` `.` `target`
@@ -1141,79 +1144,6 @@ contributors: Domenic Denicola
           1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to *undefined*.</ins>
           1. Return _resumptionValue_.
         1. Return.
-      </emu-alg>
-    </emu-clause>
-  </emu-clause>
-
-  <emu-clause id="sec-ecmascript-language-scripts-and-modules">
-    <h1>ECMAScript Language: Scripts and Modules</h1>
-
-    <emu-clause id="sec-modules">
-      <h1>Modules</h1>
-
-      <emu-clause id="sec-module-semantics">
-        <h1>Module Semantics</h1>
-
-        <emu-clause id="sec-module-semantics-static-semantics-early-errors">
-          <h1>Static Semantics: Early Errors</h1>
-          <emu-grammar>ModuleBody : ModuleItemList</emu-grammar>
-          <ul>
-            <li>
-              It is a Syntax Error if the LexicallyDeclaredNames of |ModuleItemList| contains any duplicate entries.
-            </li>
-            <li>
-              It is a Syntax Error if any element of the LexicallyDeclaredNames of |ModuleItemList| also occurs in the VarDeclaredNames of |ModuleItemList|.
-            </li>
-            <li>
-              It is a Syntax Error if the ExportedNames of |ModuleItemList| contains any duplicate entries.
-            </li>
-            <li>
-              It is a Syntax Error if any element of the ExportedBindings of |ModuleItemList| does not also occur in either the VarDeclaredNames of |ModuleItemList|, or the LexicallyDeclaredNames of |ModuleItemList|.
-            </li>
-            <li>
-              It is a Syntax Error if |ModuleItemList| Contains `super`.
-            </li>
-            <li>
-              It is a Syntax Error if |ModuleItemList| Contains |NewTarget|.
-            </li>
-            <li>
-              <ins>It is a Syntax Error if |ModuleItemList| Contains |AwaitCancelToken|.</ins>
-            </li>
-            <li>
-              It is a Syntax Error if ContainsDuplicateLabels of |ModuleItemList| with argument &laquo; &raquo; is *true*.
-            </li>
-            <li>
-              It is a Syntax Error if ContainsUndefinedBreakTarget of |ModuleItemList| with argument &laquo; &raquo; is *true*.
-            </li>
-            <li>
-              It is a Syntax Error if ContainsUndefinedContinueTarget of |ModuleItemList| with arguments &laquo; &raquo; and &laquo; &raquo; is *true*.
-            </li>
-          </ul>
-        </emu-clause>
-      </emu-clause>
-    </emu-clause>
-  </emu-clause>
-
-  <emu-clause id="sec-arrow-function-definitions">
-    <h1>Arrow Function Definitions</h1>
-
-    <emu-clause id="sec-arrow-function-definitions-static-semantics-contains">
-      <h1>Static Semantics: Contains</h1>
-      <p>With parameter _symbol_.</p>
-      <emu-see-also-para op="Contains"></emu-see-also-para>
-      <emu-grammar>ArrowFunction : ArrowParameters `=&gt;` ConciseBody</emu-grammar>
-      <emu-alg>
-        1. If _symbol_ is not one of |NewTarget|, <ins>|AwaitCancelToken|, </ins>|SuperProperty|, |SuperCall|, `super` or `this`, return *false*.
-        1. If |ArrowParameters| Contains _symbol_ is *true*, return *true*.
-        1. Return |ConciseBody| Contains _symbol_.
-      </emu-alg>
-      <emu-note>
-        <p>Normally, Contains does not look inside most function forms. However, Contains is used to detect `new.target`, <ins>`await.cancelToken`, </ins>`this`, and `super` usage within an |ArrowFunction|.</p>
-      </emu-note>
-      <emu-grammar>ArrowParameters : CoverParenthesizedExpressionAndArrowParameterList</emu-grammar>
-      <emu-alg>
-        1. Let _formals_ be CoveredFormalsList of |CoverParenthesizedExpressionAndArrowParameterList|.
-        1. Return _formals_ Contains _symbol_.
       </emu-alg>
     </emu-clause>
   </emu-clause>

@@ -407,8 +407,9 @@ contributors: Domenic Denicola
         1. Let _executionContexts_ be _cancelToken_.[[ExecutionContexts]].
         1. Repeat for each _executionContext_ in _executionContexts_
           1. Let _asyncFunctionPromise_ be _executionContext_'s PromiseToCancel component.
-          1. Assert: _asyncFunctionPromise_.[[PromiseState]] is `"pending"`.
-          1. Perform ! RejectPromise(_asyncFunctionPromise_, _cancelation_).
+          1. If _asyncFunctionPromise_ is not *null*,
+            1. Assert: _asyncFunctionPromise_.[[PromiseState]] is `"pending"`.
+            1. Perform ! RejectPromise(_asyncFunctionPromise_, _cancelation_).
       </emu-alg>
     </emu-clause>
 
@@ -864,15 +865,11 @@ contributors: Domenic Denicola
           <tbody>
             <tr>
               <td>PromiseToCancel</td>
-              <td>The Promise object which should become canceled if the associated CancelToken is canceled.</td>
-            </tr>
-            <tr>
-              <td>PromiseToReturn</td>
-              <td>The Promise object which will be returned by the async function if none is being awaited.</td>
+              <td>The Promise object which should become canceled if the associated CancelToken is canceled, or *undefined*.</td>
             </tr>
             <tr>
               <td>CancelToken</td>
-              <td>The CancelToken object which controls the cancelation of <code>await</code> expressions, or *undefined* or *null* if there is no such CancelToken.</td>
+              <td>The CancelToken object which controls the cancelation of <code>await</code> expressions, or *undefined* if there is no such CancelToken.</td>
             </tr>
           </tbody>
         </table>
@@ -1078,8 +1075,7 @@ contributors: Domenic Denicola
       <emu-alg>
         1. Let _runningContext_ be the running execution context.
         1. Let _asyncContext_ be a copy of _runningContext_.
-        1. <ins>Set the PromiseToCancel component of _asyncContext_ to _promiseCapability_.[[Promise]].</ins>
-        1. <ins>Set the PromiseToReturn component of _asyncContext_ to _promiseCapability_.[[Promise]].</ins>
+        1. <ins>Set the PromiseToCancel component of _asyncContext_ to *undefined*.</ins>
         1. <ins>Set the CancelToken component of _asyncContext_ to *undefined*.</ins>
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed for that execution context the following steps will be performed:
           1. Let _result_ be the result of evaluating _asyncFunctionBody_.
@@ -1118,7 +1114,7 @@ contributors: Domenic Denicola
         1. Perform ! PerformPromiseThen(_promiseCapability_.[[Promise]], _onFulfilled_, _onRejected_, _throwawayCapability_).
         1. Remove _asyncContext_ from the execution context stack and restore the execution context that is at the top of the execution context stack as the running execution context.
         1. Set the code evaluation state of _asyncContext_ such that when evaluation is resumed with a Completion _resumptionValue_ the following steps will be performed:
-          1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to the value of its PromiseToReturn component.</ins>
+          1. <ins>Set the value of _asyncContext_'s PromiseToCancel component to *undefined*.</ins>
           1. Return _resumptionValue_.
         1. Return.
       </emu-alg>

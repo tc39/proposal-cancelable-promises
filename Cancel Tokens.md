@@ -103,6 +103,33 @@ ct3.promise.then(cancelation => {
 
 This method has precedent in .NET's [`CancellationTokenSource.CreateLinkedTokenSource()`](https://msdn.microsoft.com/en-us/library/dd642252(v=vs.110).aspx) method.
 
+#### Example: "last"
+
+The [last](https://github.com/domenic/last) library is useful in scenarios such as autocompletes or search-on-input to ensure only the most recent result comes back. Its README gives more details on how it works. Here we show how `CancelToken.any` can be used to implement a version of `last` which not only ignores any previous requests, but cancels them.
+
+```js
+// Input: a function which takes a cancel token as its final argument
+// Output: a function which takes a cancel token as its final argument, safe for repeated calls
+
+function last(operation) {
+  let currentSource = CancelToken.source();
+
+  return function (...args) {
+    // Cancel the previous call to the operation.
+    // On the first call this is a no-op as currentSource.token is unused.
+    currentSource.cancel("The operation was called again");
+
+    // Feed the operation a token which will be canceled either if the caller requests
+    // (via inputToken) or if we cancel (via the above currentSource.cancel line).
+    const inputToken = args.pop();
+    currentSource = CancelToken.source();
+    const combinedToken = CancelToken.any([inputToken, currentSource.token]);
+
+    return operation.call(this, ...args, combinedToken);
+  };
+}
+```
+
 ### For the consumer
 
 For the one performing asynchronous work, who will accept an already-existing cancel token, there are three relevant APIs:

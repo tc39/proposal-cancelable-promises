@@ -545,8 +545,23 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-canceltoken.any">
+      <h1>CancelToken.any ( _iterable_ )</h1>
 
+      <p>The `any` function returns a new cancel token which becomes canceled in the same way as the first passed cancel token to become canceled. If _iterable_ contains any elements that are not cancel tokens, the function throws a *TypeError* exception.</p>
 
+      <emu-alg>
+        1. Let _C_ be the *this* value.
+        1. Let _source_ be ? NewCancelTokenSource(_C_).
+        1. Let _tokens_ be ? IterableToList(_iterable_).
+        1. For each element _token_ of _tokens_,
+          1. If ! IsCancelToken(_token_) is *false*, throw a *TypeError* exception.
+        1. For each element _token_ of _tokens_,
+          1. Assert: ! IsCancelToken(_token_) is *true*.
+          1. Let _throwawayCapability_ be ! NewPromiseCapability(%Promise%).
+          1. Perform ! PerformPromiseThen(_token_.[[CancelTokenPromise]], _source_.[[Cancel]], *undefined*, _throwawayCapability_).
+        1. Return _source_.[[Token]].
+      </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-canceltoken.prototype">

@@ -79,6 +79,30 @@ Note how we reuse the same cancel token for multiple sequential asynchronous ope
 
 Note the connection to treating cancelation as a non-error. If `fetch()` and `response.json()` are implemented to return a promise rejected with a `Cancel` instance once cancelation is requested (as they should be), then canceling during their operation will cause the entire promise chain to pass down the canceled path, skipping any further fulfillment handlers (like `updateUI`) or error-only rejection handlers (like `showUIError`), but causing the finally handler to run.
 
+### Combining cancel tokens
+
+Cancel tokens can be combined using the `CancelToken.any` method:
+
+```js
+const { token: ct1, cancel: cancel1 } = CancelToken.source();
+const { token: ct2, cancel: cancel2 } = CancelToken.source();
+
+const ct3 = CancelToken.any([ct1, ct2]);
+```
+
+In this example, if any of `ct1` or `ct2` becomes canceled, `ct3` will become canceled (with the same cancelation). That is, the asserts in what follows will hold:
+
+```js
+cancel2("It's a trap!");
+
+console.assert(ct3.requested === true);
+ct3.promise.then(cancelation => {
+  console.assert(cancelation.message === "It's a trap!");
+});
+```
+
+This method has precedent in .NET's [`CancellationTokenSource.CreateLinkedTokenSource()`](https://msdn.microsoft.com/en-us/library/dd642252(v=vs.110).aspx) method.
+
 ### For the consumer
 
 For the one performing asynchronous work, who will accept an already-existing cancel token, there are three relevant APIs:

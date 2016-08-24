@@ -545,10 +545,10 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-canceltoken.any">
-      <h1>CancelToken.any ( _iterable_ )</h1>
+    <emu-clause id="sec-canceltoken.race">
+      <h1>CancelToken.race ( _iterable_ )</h1>
 
-      <p>The `any` function returns a new cancel token which becomes canceled in the same way as the first passed cancel token to become canceled. If _iterable_ contains any elements that are not cancel tokens, the function throws a *TypeError* exception.</p>
+      <p>The `race` function returns a new cancel token which becomes canceled in the same way as the first passed cancel token to become canceled. If _iterable_ contains any elements that are not cancel tokens, the function throws a *TypeError* exception.</p>
 
       <emu-alg>
         1. Let _C_ be the *this* value.

@@ -81,13 +81,13 @@ Note the connection to treating cancelation as a non-error. If `fetch()` and `re
 
 ### Combining cancel tokens
 
-Cancel tokens can be combined using the `CancelToken.any` method:
+Cancel tokens can be combined using the `CancelToken.race` method:
 
 ```js
 const { token: ct1, cancel: cancel1 } = CancelToken.source();
 const { token: ct2, cancel: cancel2 } = CancelToken.source();
 
-const ct3 = CancelToken.any([ct1, ct2]);
+const ct3 = CancelToken.race([ct1, ct2]);
 ```
 
 In this example, if any of `ct1` or `ct2` becomes canceled, `ct3` will become canceled (with the same cancelation). That is, the asserts in what follows will hold:
@@ -105,7 +105,7 @@ This method has precedent in .NET's [`CancellationTokenSource.CreateLinkedTokenS
 
 #### Example: "last"
 
-The [last](https://github.com/domenic/last) library is useful in scenarios such as autocompletes or search-on-input to ensure only the most recent result comes back. Its README gives more details on how it works. Here we show how `CancelToken.any` can be used to implement a version of `last` which not only ignores any previous requests, but cancels them.
+The [last](https://github.com/domenic/last) library is useful in scenarios such as autocompletes or search-on-input to ensure only the most recent result comes back. Its README gives more details on how it works. Here we show how `CancelToken.race` can be used to implement a version of `last` which not only ignores any previous requests, but cancels them.
 
 ```js
 // Input: a function which takes a cancel token as its final argument
@@ -123,7 +123,7 @@ function last(operation) {
     // (via inputToken) or if we cancel (via the above currentSource.cancel line).
     const inputToken = args.pop();
     currentSource = CancelToken.source();
-    const combinedToken = CancelToken.any([inputToken, currentSource.token]);
+    const combinedToken = CancelToken.race([inputToken, currentSource.token]);
 
     return operation.call(this, ...args, combinedToken);
   };

@@ -494,7 +494,7 @@ contributors: Domenic Denicola
         1. If IsCallable(_executor_) is *false*, throw a *TypeError* exception.
         1. Let _cancelToken_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%CancelTokenPrototype"`, &laquo; [[CancelTokenPromise]] &raquo;).
         1. Let _dummyExecutor_ be an anonymous built-in function of no arguments that does nothing besides return *undefined*.
-        1. Let _promise_ be ! Construct(%Promise%, &laquo; _executor_ &raquo;).
+        1. Let _promise_ be ! Construct(%Promise%, &laquo; _dummyExecutor_ &raquo;).
         1. Set _cancelToken_.[[CancelTokenPromise]] to _promise_.
         1. Let _cancel_ be a new built-in function object as defined in <emu-xref href="#sec-canceler-functions" title></emu-xref>.
         1. Set _cancel_.[[CancelToken]] to _cancelToken_.

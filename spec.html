@@ -2,7 +2,7 @@
 title: Cancelable Promises
 status: proposal
 stage: 1
-location: https://domenic.github.io/cancelable-promise/
+location: https://tc39.github.io/proposal-cancelable-promises/
 copyright: false
 contributors: Domenic Denicola
 </pre>
@@ -13,7 +13,7 @@ contributors: Domenic Denicola
 <emu-intro>
   <h1>Introduction</h1>
 
-  <p>Background explanatory material for this specification can be found in the <a href="https://github.com/domenic/cancelable-promise">domenic/cancelable-promise</a> repository. See also the <a href="https://github.com/domenic/cancelable-promise/issues">issues</a>, which contain many ongoing discussions and debates.</p>
+  <p>Background explanatory material for this specification can be found in the <a href="https://github.com/tc39/proposal-cancelable-promises">tc39/proposal-cancelable-promises</a> repository. See also the <a href="https://github.com/tc39/proposal-cancelable-promises/issues">issues</a>, which contain many ongoing discussions and debates.</p>
 </emu-intro>
 
 <emu-clause id="sec-promise-objects">
@@ -204,7 +204,7 @@ contributors: Domenic Denicola
       <h1><ins>Promise.withCancelToken ( _cancelToken_, _executor_ )</ins></h1>
 
       <emu-note>
-        <p>A different name for this operation, or even the possibility of merging it into the `Promise` constructor, is under discussion in <a href="https://github.com/domenic/cancelable-promise/issues/38">#38</a>.</p>
+        <p>A different name for this operation, or even the possibility of merging it into the `Promise` constructor, is under discussion in <a href="https://github.com/tc39/proposal-cancelable-promises/issues/38">#38</a>.</p>
       </emu-note>
 
       <p>The `withCancelToken` function returns a new promise created in a similar manner to the `Promise` constructor, but with additional abilities related to promise cancelation. If the given _cancelToken_ becomes canceled, the returned promise will become canceled in the same way, and the function returned by _executor_ (known as the "cancel action") will be called.</p>

@@ -15,7 +15,7 @@
   "version": "1.0.0-pre",
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "WTFPL",
-  "repository": "domenic/cancelable-promise",
+  "repository": "tc39/proposal-cancelable-promises",
   "scripts": {
     "spec": "ecmarkup spec.html out/index.html",
     "watch": "ecmarkup --watch spec.html out/index.html"

@@ -4,7 +4,7 @@ This document outlines why it's important that cancelations are given special tr
 
 The discussions here are independent of _how_ the promise gets canceled, whether via a "task" subclass approach (as previously contemplated) or via the "cancel token" approach (as the rest of this repository assumes). The question is more about once a promise gets canceled, how that state is represented and propagates throughout the rest of the program.
 
-Many of the arguments here were previously used to [argue for a third promise state](https://github.com/domenic/cancelable-promise/blob/2f601acb3d4d438be0ebc9e4e54e6febde9d7a3a/Third%20State.md). However, that proposal was unable to gain consensus, largely due to implementation pushback against a new completion type, as well as concerns about how legacy code would not be able to deal with nonlocal exits that could not be prevented by `catch` blocks.
+Many of the arguments here were previously used to [argue for a third promise state](https://github.com/tc39/proposal-cancelable-promises/blob/2f601acb3d4d438be0ebc9e4e54e6febde9d7a3a/Third%20State.md). However, that proposal was unable to gain consensus, largely due to implementation pushback against a new completion type, as well as concerns about how legacy code would not be able to deal with nonlocal exits that could not be prevented by `catch` blocks.
 
 ## The pain of treating cancelation as an error
 
@@ -24,7 +24,7 @@ try {
 
 This kind of code ends up being necessary because to both the programmer and the user, cancelation is not a failure condition. The programmer is responsible for canceling the async operation in the first place. They don't want to treat it as something unexpected, like an actual failure of the network or similar. Similarly, if the programmer performs cancelation on behalf of a user-initiated action (like navigating away the page before it is loaded), the user doesn't want to be told that the things they no longer care about have now "errored".
 
-There is some anecdata available to emphasize the pain of this conflation of cancelations and errors. C# chose a cancelation architecture very similar to the one proposed in this repository, but without addressing this problem: they simply used a `TaskCanceledException` to represent cancelations. @benjamingr gives his experience with the pain this caused [in a comment](https://github.com/domenic/cancelable-promise/issues/14#issuecomment-227671239):
+There is some anecdata available to emphasize the pain of this conflation of cancelations and errors. C# chose a cancelation architecture very similar to the one proposed in this repository, but without addressing this problem: they simply used a `TaskCanceledException` to represent cancelations. @benjamingr gives his experience with the pain this caused [in a comment](https://github.com/tc39/proposal-cancelable-promises/issues/14#issuecomment-227671239):
 
 > `catch` catching cancellations has been a major pain point in C# - your worker goes down because a cancellation token told it to and all your logging and metric infrastructure starts going wild at night.
 >

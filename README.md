@@ -1,6 +1,6 @@
 # Cancelable Promises
 
-This is a work-in-progress repository for a proposal for adding cancelable promises to JavaScript. Per the May 2016 TC39 meeting, it is currently at Stage 1, and under heavy development. You can view the in-progress [spec draft](https://domenic.github.io/cancelable-promise/) and take part in the discussions on the [issue tracker](https://github.com/domenic/cancelable-promise/issues).
+This is a work-in-progress repository for a proposal for adding cancelable promises to JavaScript. Per the May 2016 TC39 meeting, it is currently at Stage 1, and under heavy development. You can view the in-progress [spec draft](https://tc39.github.io/proposal-cancelable-promises/) and take part in the discussions on the [issue tracker](https://github.com/tc39/proposal-cancelable-promises/issues).
 
 ## Motivation and use cases
 

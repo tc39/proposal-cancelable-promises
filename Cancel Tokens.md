@@ -103,6 +103,47 @@ ct3.promise.then(cancelation => {
 
 This method has precedent in .NET's [`CancellationTokenSource.CreateLinkedTokenSource()`](https://msdn.microsoft.com/en-us/library/dd642252(v=vs.110).aspx) method.
 
+#### Example: animating a UI component
+
+@stefanpenner was kind enough to [outline his envisioned usage of this method](https://github.com/tc39/proposal-cancelable-promises/issues/47#issuecomment-242443380) for an animating UI component, which stops animating either on request from its consumer, or when the component becomes destroyed. We paraphrase it here.
+
+```js
+class AnimatingProgressUIComponent {
+  show() {
+    this._existsToken = new CancelToken(cancel => {
+      this._cancelExistence = cancel;
+    });
+
+    this._animationToken = new CancelToken(cancel => {
+      this._cancelAnimation = cancel;
+    });
+
+    this._animate(CancelToken.race([this._existsToken, this._animationToken]));
+    this.text = "Operation in progress...";
+  }
+
+  destroy() {
+    this._cancelExistence();
+  }
+
+  finishOperation() {
+    this._cancelAnimation();
+    this.text = "Operation finished!";
+  }
+
+  _animate(cancelToken) {
+    if (cancelToken.requested) {
+      return;
+    }
+
+    // insert amazing animation code here
+
+    requestAnimationFrame(() => this._animate(cancelToken));
+  }
+}
+```
+
+
 #### Example: "last"
 
 The [last](https://github.com/domenic/last) library is useful in scenarios such as autocompletes or search-on-input to ensure only the most recent result comes back. Its README gives more details on how it works. Here we show how `CancelToken.race` can be used to implement a version of `last` which not only ignores any previous requests, but cancels them.

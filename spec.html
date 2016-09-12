@@ -243,11 +243,16 @@ contributors: Domenic Denicola
         <emu-alg>
           1. Let _cancelAction_ be _F_.[[CancelAction]].
           1. Let _reject_ be _F_.[[Reject]].
+          1. If _reject_.[[AlreadyResolved]] is *true*, return *undefined*.
           1. Let _result_ be Call(_cancelAction_, *undefined*, &laquo; _cancelation_ &raquo;).
           1. If _result_ is an abrupt completion, perform ? Call(_reject_, *undefined*, &laquo; _result_.[[Value]] &raquo;).
           1. Otherwise, perform ? Call(_reject_, *undefined*, &laquo; _cancelation_ &raquo;).
           1. Return *undefined*.
         </emu-alg>
+
+        <emu-note>
+          <p>Given that this function does nothing once the promise has been resolved or rejected, implementations might want to remove it entirely from _cancelToken_.[[CancelTokenPromise]].[[FulfillReactions]] if that occurs for better memory management.</p>
+        </emu-note>
       </emu-clause>
     </emu-clause>
   </emu-clause>

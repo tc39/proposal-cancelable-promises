@@ -230,8 +230,6 @@ function xhrAdapted(url, { cancelToken } = {}) {
 }
 ```
 
-For reference, the rough equivalent of the `Promise.withCancelToken` spec is maintained [in the repository](with-cancel-token.js).
-
 #### Basic usage within async functions
 
 The primary use of the `.throwIfRequested()` API is within async functions that want to provide additional opportunities within their body for cancelation requests to interrupt their flow. First let's see an example where it is _not_ necessary:

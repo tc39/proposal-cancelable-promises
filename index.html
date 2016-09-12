@@ -187,8 +187,12 @@
 
         <p>When a <code>Promise.withCancelToken</code> cancelation reaction function <var>F</var> is called with argument <var>cancelation</var>, the following steps are taken:</p>
 
-        <emu-alg><ol><li>Let <var>cancelAction</var> be <var>F</var>.[[CancelAction]].</li><li>Let <var>reject</var> be <var>F</var>.[[Reject]].</li><li>Let <var>result</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>cancelAction</var>, <emu-val>undefined</emu-val>, « <var>cancelation</var> »).</li><li>If <var>result</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>reject</var>, <emu-val>undefined</emu-val>, « <var>result</var>.[[Value]] »).</li><li>Otherwise, perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>reject</var>, <emu-val>undefined</emu-val>, « <var>cancelation</var> »).</li><li>Return <emu-val>undefined</emu-val>.
+        <emu-alg><ol><li>Let <var>cancelAction</var> be <var>F</var>.[[CancelAction]].</li><li>Let <var>reject</var> be <var>F</var>.[[Reject]].</li><li>If <var>reject</var>.[[AlreadyResolved]] is <emu-val>true</emu-val>, return <emu-val>undefined</emu-val>.</li><li>Let <var>result</var> be <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>cancelAction</var>, <emu-val>undefined</emu-val>, « <var>cancelation</var> »).</li><li>If <var>result</var> is an <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.github.io/ecma262/#sec-completion-record-specification-type">abrupt completion</a></emu-xref>, perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>reject</var>, <emu-val>undefined</emu-val>, « <var>result</var>.[[Value]] »).</li><li>Otherwise, perform ? <emu-xref aoid="Call"><a href="https://tc39.github.io/ecma262/#sec-call">Call</a></emu-xref>(<var>reject</var>, <emu-val>undefined</emu-val>, « <var>cancelation</var> »).</li><li>Return <emu-val>undefined</emu-val>.
         </li></ol></emu-alg>
+
+        <emu-note><span class="note">Note</span>
+          <p>Given that this function does nothing once the promise has been resolved or rejected, implementations might want to remove it entirely from <var>cancelToken</var>.[[CancelTokenPromise]].[[FulfillReactions]] if that occurs for better memory management.</p>
+        </emu-note>
       </emu-clause>
     </emu-clause>
   </emu-clause>

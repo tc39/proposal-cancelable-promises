@@ -407,27 +407,17 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-is-cancel-token-requested" aoid="CancelTokenCancelation">
-      <h1>CancelTokenCancelation ( _cancelToken_ )</h1>
+    <emu-clause id="sec-cancel-token-reason" aoid="CancelTokenReason">
+      <h1>CancelTokenReason ( _cancelToken_ )</h1>
 
-      <p>The abstract operation CancelTokenCancelation returns the cancel token's cancelation.</p>
-
-      <emu-alg>
-        1. Assert: ! IsCancelToken(_cancelToken_) is *true*.
-        1. Assert: ! CancelTokenIsRequested(_cancelToken_) is *true*.
-        1. Return _cancelToken_.[[CancelTokenPromise]].[[PromiseResult]].
-      </emu-alg>
-    </emu-clause>
-
-    <emu-clause id="sec-cancel-token-is-requested" aoid="CancelTokenIsRequested">
-      <h1>CancelTokenIsRequested ( _cancelToken_ )</h1>
-
-      <p>The abstract operation CancelTokenIsRequested returns *true* if cancelation has been requested for the given cancel token, or *false* otherwise.</p>
+      <p>The abstract operation CancelTokenReason returns the cancel token's cancelation reason.</p>
 
       <emu-alg>
         1. Assert: ! IsCancelToken(_cancelToken_) is *true*.
-        1. If _cancelToken_.[[CancelTokenPromise]].[[PromiseState]] is `"fulfilled"`, return *true*.
-        1. Return *false*.
+        1. If _cancelToken_.[[CancelTokenPromise]].[[PromiseState]] is not `"fulfilled"`, return *undefined*.
+        1. Let _reason_ be _cancelToken_.[[CancelTokenPromise]].[[PromiseResult]].
+        1. Assert: _reason_ has a [[CancelBrand]] internal slot.
+        1. Return _reason_.
       </emu-alg>
     </emu-clause>
 
@@ -443,7 +433,7 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-new-cancel-token-source">
+    <emu-clause id="sec-new-cancel-token-source" aoid="NewCancelTokenSource">
       <h1>NewCancelTokenSource ( _C_ )</h1>
 
       <p>The abstract operation NewCancelTokenSource takes a constructor function, and attempts to use that constructor function in the fashion of the built-in `CancelToken` constructor to create a cancel token and extract its cancel function. The cancel token plus its cancel function is used to initialize a new Record which is returned.</p>
@@ -557,7 +547,11 @@ contributors: Domenic Denicola
         1. For each element _token_ of _tokens_,
           1. If ! IsCancelToken(_token_) is *false*, throw a *TypeError* exception.
         1. For each element _token_ of _tokens_,
-          1. Assert: ! IsCancelToken(_token_) is *true*.
+          1. Let _reason_ be CancelTokenReason(_token_).
+          1. If _reason_ is not *undefined*,
+            1. Perform ? Call(_source_.[[Cancel]], *undefined*, &laquo; _reason_ &raquo;).
+            1. Return _source_.[[Token]].
+        1. For each element _token_ of _tokens_,
           1. Let _throwawayCapability_ be ! NewPromiseCapability(%Promise%).
           1. Perform ! PerformPromiseThen(_token_.[[CancelTokenPromise]], _source_.[[Cancel]], *undefined*, _throwawayCapability_).
         1. Return _source_.[[Token]].
@@ -586,7 +580,8 @@ contributors: Domenic Denicola
       <emu-alg>
         1. Let _T_ be the *this* value.
         1. If ! IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
-        1. If ! CancelTokenIsRequested(_T_) is *true*, return Completion { [[Type]]: ~throw~, [[Value]]: CancelTokenCancelation(_T_), [[Target]]: ~empty~ }.
+        1. Let _reason_ be ! CancelTokenReason(_T_).
+        1. If _reason_ is not *undefined*, return Completion { [[Type]]: ~throw~, [[Value]]: _reason_, [[Target]]: ~empty~ }.
         1. Return *undefined*.
       </emu-alg>
     </emu-clause>
@@ -609,15 +604,15 @@ contributors: Domenic Denicola
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-canceltoken.prototype.requested">
-      <h1>get CancelToken.prototype.requested</h1>
+    <emu-clause id="sec-canceltoken.prototype.reason">
+      <h1>get CancelToken.prototype.reason</h1>
 
-      <p>`CancelToken.prototype.requested` is an accessor property whose set accessor is *undefined*. Its get accessor function performs the following steps:</p>
+      <p>`CancelToken.prototype.reason` is an accessor property whose set accessor is *undefined*. Its get accessor function performs the following steps:</p>
 
       <emu-alg>
         1. Let _T_ be the *this* value.
         1. If ! IsCancelToken(_T_) is *false*, throw a *TypeError* exception.
-        1. Return ! CancelTokenIsRequested(_T_).
+        1. Return ! CancelTokenReason(_T_).
       </emu-alg>
     </emu-clause>
 
@@ -1138,7 +1133,9 @@ contributors: Domenic Denicola
       <emu-alg>
         1. Let _asyncContext_ be the running execution context.
         1. <ins>Let _cancelToken_ be _asyncContext_'s CancelToken component.</ins>
-        1. <ins>If _cancelToken_ is not *undefined*, and ! CancelTokenIsRequested(_cancelToken_) is *true*, return Completion { [[Type]]: ~throw~, [[Value]]: CancelTokenCancelation(_cancelToken_), [[Target]]: ~empty~ }.</ins>
+        1. <ins>If _cancelToken_ is not *undefined*,
+          1. <ins>Let _reason_ be ! CancelTokenReason(_cancelToken_).</ins>
+          1. <ins>If _reason_ is not *undefined*, return Completion { [[Type]]: ~throw~, [[Value]]: _reason_, [[Target]]: ~empty~ }.</ins>
         1. Let _promiseCapability_ be ! NewPromiseCapability(%Promise%).
         1. <del>Let _resolveResult_ be</del><ins>Perform</ins> ! Call(_promiseCapability_.[[Resolve]], *undefined*, « _value_ »).
         1. Let _onFulfilled_ be a new built-in function object as defined in <emu-xref title href="#abstract-ops-awaited-fulfilled"></emu-xref>.

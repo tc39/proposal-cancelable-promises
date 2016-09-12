@@ -4,8 +4,8 @@ Cancel tokens are a generic facility for requesting and responding to cancelatio
 
 When used to cancel asynchronous work, the creator is generally the one initiating the asynchronous work (e.g. calling a promise-returning function). The cancel token is then passed as an argument to the procedure that performs the asynchronous work. The receiver of the token can:
 
-- Synchronously check at any time whether cancelation has been requested
-- Synchronously throw a cancelation if cancelation has been requested
+- Synchronously check at any time whether cancelation has been requested, and if so, what the reason was
+- Synchronously throw the cancelation reason if cancelation has been requested
 - Register a callback that will be asynchronously executed once cancelation is requested
 - Pass the cancel token to other procedures, if it chooses to do so
 
@@ -94,11 +94,8 @@ In this example, if any of `ct1` or `ct2` becomes canceled, `ct3` will become ca
 
 ```js
 cancel2("It's a trap!");
-
-console.assert(ct3.requested === true);
-ct3.promise.then(cancelation => {
-  console.assert(cancelation.message === "It's a trap!");
-});
+console.assert(ct3.reason.message === "It's a trap");
+console.assert(ct3.reason === ct2.reason);
 ```
 
 This method has precedent in .NET's [`CancellationTokenSource.CreateLinkedTokenSource()`](https://msdn.microsoft.com/en-us/library/dd642252(v=vs.110).aspx) method.
@@ -132,7 +129,7 @@ class AnimatingProgressUIComponent {
   }
 
   _animate(cancelToken) {
-    if (cancelToken.requested) {
+    if (cancelToken.reason) {
       return;
     }
 
@@ -175,7 +172,7 @@ function last(operation) {
 
 For the one performing asynchronous work, who will accept an already-existing cancel token, there are three relevant APIs:
 
-- `cancelToken.requested`, which returns a boolean specifying whether cancelation has been requested (by the creator's associated `cancel` function)
+- `cancelToken.reason`, which returns either undefined if cancelation has not been requested, or an instance of `Cancel` given the cancelation reason if it has
 - `cancelToken.promise`, which allows registration for a callback when cancelation is requested, fulfilled with a `Cancel` instance constructed when calling the associated `cancel`
 - `cancelToken.throwIfRequested()`, which will automatically `throw` the stored `Cancel` instance if cancelation is requested (or do nothing otherwise)
 
